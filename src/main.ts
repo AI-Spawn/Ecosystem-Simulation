@@ -5,11 +5,13 @@ let speed: number = 500;
 let cnv: p5.Renderer;
 let moveUpdate: number = Date.now();
 function setup() {
+  console.log(`An example of a function from another file: ${squareNum(5)}`);
+
   cnv = createCanvas(windowWidth, windowHeight);
   cnv.position(0, 0);
 }
 function draw() {
-  background(0);
+  background(101);
 
   ellipse(x, height / 2, 50, 50);
 

@@ -3,6 +3,7 @@ var speed = 500;
 var cnv;
 var moveUpdate = Date.now();
 function setup() {
+    console.log("An example of using a function from another file: " + squareNum(5));
     cnv = createCanvas(windowWidth, windowHeight);
     cnv.position(0, 0);
 }
@@ -19,5 +20,8 @@ function draw() {
         x = width - 25;
     }
     moveUpdate = Date.now();
+}
+function squareNum(x) {
+    return Math.pow(x, 2);
 }
 //# sourceMappingURL=../src/src/main.js.map
