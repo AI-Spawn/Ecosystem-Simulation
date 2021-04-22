@@ -3,7 +3,7 @@ var speed = 500;
 var cnv;
 var moveUpdate = Date.now();
 function setup() {
-    console.log("An example of using a function from another file: " + squareNum(5));
+    console.log("An example of a function from another file: " + squareNum(5));
     cnv = createCanvas(windowWidth, windowHeight);
     cnv.position(0, 0);
 }

@@ -11,7 +11,7 @@ function setup() {
   cnv.position(0, 0);
 }
 function draw() {
-  background(101);
+  background(0);
 
   ellipse(x, height / 2, 50, 50);
 
