@@ -1,6 +1,6 @@
 # p5js TypeScript Template
 
-A template to easily set up p5js project using TypeScript.
+A template to easily set up a p5js project using TypeScript.
 
 [Live Demo](https://aispawn.com/p5js-typescript-template/)
 
