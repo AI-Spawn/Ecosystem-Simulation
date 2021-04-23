@@ -1,9 +1,9 @@
-let x: number = 500;
+let x = 500;
 
-let speed: number = 500;
+let speed = 500;
 
 let cnv: p5.Renderer;
-let moveUpdate: number = Date.now();
+let moveUpdate = Date.now();
 function setup() {
   console.log(`An example of a function from another file: ${squareNum(5)}`);
 
