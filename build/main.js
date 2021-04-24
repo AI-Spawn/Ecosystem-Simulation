@@ -6,7 +6,7 @@ class Ant {
 }
 let cnv;
 let moveUpdate = Date.now();
-let num_food = 10;
+let num_food = 1;
 let depos = [];
 function setup() {
     cnv = createCanvas(windowWidth, windowHeight);
