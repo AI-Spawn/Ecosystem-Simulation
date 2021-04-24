@@ -22,13 +22,21 @@ class Ant {
 
     if (this.x < this.size / 2 || this.x > width - this.size / 2) {
       this.vel[0] *= -1;
+      this.x = clamp(
+        this.x,
+        this.size / 2 + this.speed,
+        width - this.size / 2 - this.speed
+      );
     }
 
     if (this.y < this.size / 2 || this.y > height - this.size / 2) {
       this.vel[1] *= -1;
+      this.y = clamp(
+        this.y,
+        this.size / 2 + this.speed,
+        height - this.size / 2 - this.speed
+      );
     }
-    this.x = clamp(this.x, this.size / 2 + 1, width - this.size / 2 - 1);
-    this.y = clamp(this.y, this.size / 2 + 1, height - this.size / 2 - 1);
   }
 
   show() {
