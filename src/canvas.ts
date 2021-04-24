@@ -9,7 +9,7 @@ function setup() {
   cnv.position(0, 0);
 
   for (let i = 0; i < num_food; i++) {
-    depos.push(new Food(random(0, width), random(0, height), random(100, 500)));
+    depos.push(new Food());
   }
 }
 function draw() {
@@ -19,11 +19,7 @@ function draw() {
     f.show();
     f.consume(1);
     if (f.capacity <= 10) {
-      depos[i] = new Food(
-        random(0, width),
-        random(0, height),
-        random(100, 500)
-      );
+      depos[i] = new Food();
     }
   }
 }

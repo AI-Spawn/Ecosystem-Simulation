@@ -15,7 +15,7 @@ function setup() {
     cnv = createCanvas(windowWidth, windowHeight);
     cnv.position(0, 0);
     for (var i = 0; i < num_food; i++) {
-        depos.push(new Food(random(0, width), random(0, height), random(100, 500)));
+        depos.push(new Food());
     }
 }
 function draw() {
@@ -25,15 +25,17 @@ function draw() {
         f.show();
         f.consume(1);
         if (f.capacity <= 10) {
-            depos[i] = new Food(random(0, width), random(0, height), random(100, 500));
+            depos[i] = new Food();
         }
     }
 }
+var min_food_size = 100;
+var max_food_size = 300;
 var Food = (function () {
     function Food(x, y, c) {
-        if (x === void 0) { x = 0; }
-        if (y === void 0) { y = 0; }
-        if (c === void 0) { c = 50; }
+        if (x === void 0) { x = random(0, width); }
+        if (y === void 0) { y = random(0, height); }
+        if (c === void 0) { c = random(min_food_size, max_food_size); }
         this.x = x;
         this.y = y;
         this.capacity = c;

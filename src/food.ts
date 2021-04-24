@@ -1,8 +1,15 @@
+let min_food_size = 100;
+let max_food_size = 300;
+
 class Food {
   x: number;
   y: number;
   capacity: number;
-  constructor(x = 0, y = 0, c = 50) {
+  constructor(
+    x = random(0, width),
+    y = random(0, height),
+    c = random(min_food_size, max_food_size)
+  ) {
     this.x = x;
     this.y = y;
     this.capacity = c;
