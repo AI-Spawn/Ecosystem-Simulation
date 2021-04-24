@@ -7,11 +7,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - run: npm i
-      - name: Building Typescript
-        uses: FuLagann/tsc-build-push@v1
-        with:
-          user-name: "BuildBoio"
-          user-email: "buildboio@aispawn.com"
-          message: "Automatically built unbuilt typescript"
-          directories: ./
+      - name: Install Packages
+        run: npm i
+      - name: Git Config
+        run: git config user.name "BuildBoio" && git config user.email "83129584+BuildBoio@users.noreply.github.com"
+      - name: Build TS
+        run: tsc
+      - name: git branch
+        run: git checkout prod
+      - name: push
+        run: git add . && git commit -m "build ts" && git push --set-upstream origin prod
