@@ -1,10 +1,10 @@
 let cnv: p5.Renderer;
 let moveUpdate = Date.now();
 
-let num_food = 1;
+let num_food = 10;
 let depos: Food[] = [];
 
-let num_ants = 2;
+let num_ants = 5;
 let ants: Ant[] = [];
 
 function setup() {
@@ -17,10 +17,10 @@ function setup() {
   for (let i = 0; i < num_ants; i++) {
     ants.push(new Ant());
   }
+  textAlign(CENTER, CENTER);
 }
 function draw() {
   background(0);
-
   for (let i = 0; i < depos.length; i++) {
     let f = depos[i];
     f.show();
@@ -31,15 +31,20 @@ function draw() {
 
   for (let i = 0; i < ants.length; i++) {
     let a = ants[i];
-    a.show();
+    if (!a.dead) {
+      a.show();
 
-    //if overlapping, consume
-    for (const f of depos) {
-      if (dist(a.x, a.y, f.x, f.y) <= (a.size + f.capacity) / 2) {
-        a.eat(f);
+      //if overlapping, consume
+      for (const f of depos) {
+        if (dist(a.x, a.y, f.x, f.y) <= (a.size + f.capacity) / 2) {
+          a.eat(f);
+        }
       }
-    }
 
-    a.move();
+      if (a.food <= 0) {
+        a.dead = true;
+      }
+      a.move();
+    }
   }
 }

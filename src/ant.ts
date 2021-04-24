@@ -2,20 +2,24 @@ class Ant {
   x: number;
   y: number;
   size = 50;
-  food = 50;
+  food = 500;
 
   speed = 5;
+
   eat_rate = 1;
-  max_food = 255;
+  energy_rate = 2;
+  max_food = 1000;
 
   vel = [random(-1, 1), random(-1, 1)];
-
+  dead = false;
   constructor(x = random(0, width), y = random(0, height)) {
     this.x = x;
     this.y = y;
   }
 
   move() {
+    this.food -= 1;
+
     let vel = bindVector(this.vel[0], this.vel[1], this.speed);
     this.x += vel[0];
     this.y += vel[1];
@@ -40,15 +44,19 @@ class Ant {
   }
 
   show() {
-    fill(99, 202, 216);
-    ellipse(this.x, this.y, this.size, this.size);
+    if (!this.dead) {
+      fill(99, 202, 216);
+      ellipse(this.x, this.y, this.size, this.size);
+      fill(0);
+      text(this.food, this.x, this.y);
+    }
   }
 
   eat(food: Food) {
     if (this.food < this.max_food) {
       food.consume(this.eat_rate);
-      this.food += this.eat_rate;
-      this.size = clamp(this.food, 50, 75);
+      this.food += this.energy_rate;
+      this.size = clamp(this.food / 100, 50, 75);
     }
   }
 }

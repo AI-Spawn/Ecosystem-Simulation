@@ -2,15 +2,18 @@
 class Ant {
     constructor(x = random(0, width), y = random(0, height)) {
         this.size = 50;
-        this.food = 50;
+        this.food = 500;
         this.speed = 5;
         this.eat_rate = 1;
-        this.max_food = 255;
+        this.energy_rate = 2;
+        this.max_food = 1000;
         this.vel = [random(-1, 1), random(-1, 1)];
+        this.dead = false;
         this.x = x;
         this.y = y;
     }
     move() {
+        this.food -= 1;
         let vel = bindVector(this.vel[0], this.vel[1], this.speed);
         this.x += vel[0];
         this.y += vel[1];
@@ -24,14 +27,18 @@ class Ant {
         }
     }
     show() {
-        fill(99, 202, 216);
-        ellipse(this.x, this.y, this.size, this.size);
+        if (!this.dead) {
+            fill(99, 202, 216);
+            ellipse(this.x, this.y, this.size, this.size);
+            fill(0);
+            text(this.food, this.x, this.y);
+        }
     }
     eat(food) {
         if (this.food < this.max_food) {
             food.consume(this.eat_rate);
-            this.food += this.eat_rate;
-            this.size = clamp(this.food, 50, 75);
+            this.food += this.energy_rate;
+            this.size = clamp(this.food / 100, 50, 75);
         }
     }
 }
@@ -54,9 +61,9 @@ function clamp(num, min, max) {
 }
 let cnv;
 let moveUpdate = Date.now();
-let num_food = 1;
+let num_food = 10;
 let depos = [];
-let num_ants = 2;
+let num_ants = 5;
 let ants = [];
 function setup() {
     cnv = createCanvas(windowWidth, windowHeight);
@@ -67,6 +74,7 @@ function setup() {
     for (let i = 0; i < num_ants; i++) {
         ants.push(new Ant());
     }
+    textAlign(CENTER, CENTER);
 }
 function draw() {
     background(0);
@@ -79,13 +87,18 @@ function draw() {
     }
     for (let i = 0; i < ants.length; i++) {
         let a = ants[i];
-        a.show();
-        for (const f of depos) {
-            if (dist(a.x, a.y, f.x, f.y) <= (a.size + f.capacity) / 2) {
-                a.eat(f);
+        if (!a.dead) {
+            a.show();
+            for (const f of depos) {
+                if (dist(a.x, a.y, f.x, f.y) <= (a.size + f.capacity) / 2) {
+                    a.eat(f);
+                }
             }
+            if (a.food <= 0) {
+                a.dead = true;
+            }
+            a.move();
         }
-        a.move();
     }
 }
 let min_food_size = 100;
