@@ -18,7 +18,7 @@ function draw() {
     let f = depos[i];
     f.show();
     f.consume(1);
-    if (f.capacity <= 10) {
+    if (f.capacity <= 20) {
       depos[i] = new Food();
     }
   }
