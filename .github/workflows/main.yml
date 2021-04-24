@@ -14,6 +14,6 @@ jobs:
       - name: Build TS
         run: tsc
       - name: git branch
-        run: git checkout prod
+        run: git branch prod
       - name: push
         run: git add . && git commit -m "build ts" && git push --set-upstream origin prod
