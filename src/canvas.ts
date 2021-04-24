@@ -1,7 +1,7 @@
 let cnv: p5.Renderer;
 let moveUpdate = Date.now();
 
-let num_food = 10;
+let num_food = 1;
 let depos: Food[] = [];
 
 function setup() {
