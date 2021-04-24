@@ -1,27 +1,55 @@
-var x = 500;
-var speed = 500;
+var Ant = (function () {
+    function Ant(xs, ys) {
+        if (xs === void 0) { xs = 0; }
+        if (ys === void 0) { ys = 0; }
+        this.x = xs;
+        this.y = ys;
+    }
+    return Ant;
+}());
 var cnv;
 var moveUpdate = Date.now();
+var num_food = 10;
+var depos = [];
 function setup() {
-    console.log("An example of a function from another file: " + squareNum(5));
     cnv = createCanvas(windowWidth, windowHeight);
     cnv.position(0, 0);
+    for (var i = 0; i < num_food; i++) {
+        depos.push(new Food(random(0, width), random(0, height), random(100, 500)));
+    }
 }
 function draw() {
     background(0);
-    ellipse(x, height / 2, 50, 50);
-    x += ((Date.now() - moveUpdate) / 1000) * speed;
-    if (x < 25) {
-        speed *= -1;
-        x = 25;
+    for (var i = 0; i < depos.length; i++) {
+        var f = depos[i];
+        f.show();
+        f.consume(1);
+        if (f.capacity <= 10) {
+            depos[i] = new Food(random(0, width), random(0, height), random(100, 500));
+        }
     }
-    if (x > width - 25) {
-        speed *= -1;
-        x = width - 25;
+}
+var Food = (function () {
+    function Food(x, y, c) {
+        if (x === void 0) { x = 0; }
+        if (y === void 0) { y = 0; }
+        if (c === void 0) { c = 50; }
+        this.x = x;
+        this.y = y;
+        this.capacity = c;
     }
-    moveUpdate = Date.now();
-}
-function squareNum(x) {
-    return Math.pow(x, 2);
-}
+    Food.prototype.show = function () {
+        fill(255);
+        ellipse(this.x, this.y, this.capacity, this.capacity);
+    };
+    Food.prototype.consume = function (amount) {
+        if (amount > 0) {
+            this.capacity -= amount;
+        }
+        if (this.capacity < 0) {
+            this.capacity = 0;
+        }
+    };
+    return Food;
+}());
 //# sourceMappingURL=../src/src/main.js.map
