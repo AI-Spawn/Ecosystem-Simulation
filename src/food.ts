@@ -16,7 +16,7 @@ class Food {
   }
 
   show() {
-    fill(58, 145, 11);
+    fill(40, 204, 45);
     ellipse(this.x, this.y, this.capacity, this.capacity);
   }
 
