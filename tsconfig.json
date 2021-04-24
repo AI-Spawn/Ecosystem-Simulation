@@ -9,7 +9,6 @@
     "rootDir": "./src/",
     "sourceMap": true,
     "sourceRoot": "./src/",
-    "target": "es6",
-    "watch": true
+    "target": "es6"
   }
 }
