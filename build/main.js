@@ -13,7 +13,6 @@ class Ant {
         this.y = y;
     }
     move() {
-        this.food -= 1;
         let vel = bindVector(this.vel[0], this.vel[1], this.speed);
         this.x += vel[0];
         this.y += vel[1];
@@ -59,14 +58,18 @@ function bindVector(x, y, magnitude = 1) {
 function clamp(num, min, max) {
     return num <= min ? min : num >= max ? max : num;
 }
+function dc(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
 let cnv;
 let moveUpdate = Date.now();
 let num_food = 10;
 let depos = [];
 let num_ants = 5;
 let ants = [];
+let size = 5000;
 function setup() {
-    cnv = createCanvas(windowWidth, windowHeight);
+    cnv = createCanvas(size, size * (windowHeight / windowWidth));
     cnv.position(0, 0);
     for (let i = 0; i < num_food; i++) {
         depos.push(new Food());
@@ -77,6 +80,8 @@ function setup() {
     textAlign(CENTER, CENTER);
 }
 function draw() {
+    clear();
+    scale(windowWidth / size);
     background(0);
     for (let i = 0; i < depos.length; i++) {
         let f = depos[i];

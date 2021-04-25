@@ -7,8 +7,10 @@ let depos: Food[] = [];
 let num_ants = 5;
 let ants: Ant[] = [];
 
+let size = 5000;
+
 function setup() {
-  cnv = createCanvas(windowWidth, windowHeight);
+  cnv = createCanvas(size, size * (windowHeight / windowWidth));
   cnv.position(0, 0);
 
   for (let i = 0; i < num_food; i++) {
@@ -20,6 +22,9 @@ function setup() {
   textAlign(CENTER, CENTER);
 }
 function draw() {
+  clear();
+  scale(windowWidth / size);
+
   background(0);
   for (let i = 0; i < depos.length; i++) {
     let f = depos[i];

@@ -17,3 +17,7 @@ function bindVector(x: number, y: number, magnitude = 1) {
 function clamp(num: number, min: number, max: number) {
   return num <= min ? min : num >= max ? max : num;
 }
+
+function dc(obj: any) {
+  return JSON.parse(JSON.stringify(obj));
+}

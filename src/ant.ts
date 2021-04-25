@@ -18,7 +18,7 @@ class Ant {
   }
 
   move() {
-    this.food -= 1;
+    // this.food -= 1;
 
     let vel = bindVector(this.vel[0], this.vel[1], this.speed);
     this.x += vel[0];
