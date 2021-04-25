@@ -43,7 +43,10 @@ class Ant {
 
   show() {
     if (!this.dead) {
-      fill(99, 202, 216);
+      strokeWeight(2);
+      stroke(0);
+
+      fill(47, 185, 161);
       ellipse(this.x, this.y, this.size, this.size);
       fill(0);
     }
@@ -67,9 +70,9 @@ class Ant {
     }
     d.sort((a, b) => (a.dist > b.dist ? 1 : -1));
 
-    for (let i = 0; i < min(5, d.length); i++) {
+    for (let i = 0; i < min(2, d.length); i++) {
       let c = d[i];
-      // line(this.x, this.y, c.ant.x, c.ant.y);
+      line(this.x, this.y, c.ant.x, c.ant.y);
     }
   }
 }

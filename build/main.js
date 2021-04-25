@@ -29,7 +29,9 @@ class Ant {
     }
     show() {
         if (!this.dead) {
-            fill(99, 202, 216);
+            strokeWeight(2);
+            stroke(0);
+            fill(47, 185, 161);
             ellipse(this.x, this.y, this.size, this.size);
             fill(0);
         }
@@ -50,8 +52,9 @@ class Ant {
             }
         }
         d.sort((a, b) => (a.dist > b.dist ? 1 : -1));
-        for (let i = 0; i < min(5, d.length); i++) {
+        for (let i = 0; i < min(2, d.length); i++) {
             let c = d[i];
+            line(this.x, this.y, c.ant.x, c.ant.y);
         }
     }
 }
@@ -96,7 +99,8 @@ function setup() {
 function draw() {
     clear();
     scale(windowWidth / size);
-    background(0);
+    background(128, 175, 73);
+    gen_grid_lines();
     for (let i = 0; i < depos.length; i++) {
         let f = depos[i];
         f.show();
@@ -121,11 +125,11 @@ function draw() {
             a.move();
         }
     }
+    stroke(255, 0, 0);
+    strokeWeight(3);
     for (let a of ants) {
         let range = new Circle(a.x, a.y, 100);
         let points = qtree.query(range);
-        stroke(255);
-        strokeWeight(1);
         a.drawClosest(points);
     }
 }
@@ -138,7 +142,9 @@ class Food {
         this.capacity = c;
     }
     show() {
-        fill(40, 204, 45);
+        stroke(40, 64, 14);
+        strokeWeight(this.capacity / 5);
+        fill(62, 93, 33);
         ellipse(this.x, this.y, this.capacity, this.capacity);
     }
     consume(amount) {
@@ -148,6 +154,17 @@ class Food {
         if (this.capacity < 0) {
             this.capacity = 0;
         }
+    }
+}
+function gen_grid_lines() {
+    let grid_spacing = width / 10;
+    stroke(0);
+    strokeWeight(2);
+    for (let i = 0; i < width / grid_spacing; i++) {
+        line(i * grid_spacing, 0, i * grid_spacing, height);
+    }
+    for (let i = 0; i < height / grid_spacing; i++) {
+        line(0, i * grid_spacing, width, i * grid_spacing);
     }
 }
 class Point {

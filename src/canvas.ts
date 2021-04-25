@@ -25,7 +25,10 @@ function draw() {
   clear();
   scale(windowWidth / size);
 
-  background(0);
+  background(128, 175, 73);
+
+  gen_grid_lines();
+
   for (let i = 0; i < depos.length; i++) {
     let f = depos[i];
     f.show();
@@ -54,12 +57,12 @@ function draw() {
       a.move();
     }
   }
-
+  stroke(255, 0, 0);
+  strokeWeight(3);
   for (let a of ants) {
     let range = new Circle(a.x, a.y, 100);
     let points = qtree.query(range);
-    stroke(255);
-    strokeWeight(1);
+
     a.drawClosest(points);
   }
 }
