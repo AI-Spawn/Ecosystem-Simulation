@@ -1,10 +1,10 @@
 let cnv: p5.Renderer;
 let moveUpdate = Date.now();
 
-let num_food = 10;
+let num_food = 100;
 let depos: Food[] = [];
 
-let num_ants = 5;
+let num_ants = 500;
 let ants: Ant[] = [];
 
 let size = 5000;
@@ -34,8 +34,10 @@ function draw() {
     }
   }
 
-  for (let i = 0; i < ants.length; i++) {
-    let a = ants[i];
+  let qtree = QuadTree.create();
+  for (let a of ants) {
+    let point = new Point(a.x, a.y, a);
+    qtree.insert(point);
     if (!a.dead) {
       a.show();
 
@@ -51,5 +53,13 @@ function draw() {
       }
       a.move();
     }
+  }
+
+  for (let a of ants) {
+    let range = new Circle(a.x, a.y, 100);
+    let points = qtree.query(range);
+    stroke(255);
+    strokeWeight(1);
+    a.drawClosest(points);
   }
 }

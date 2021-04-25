@@ -4,7 +4,7 @@ class Ant {
   size = 50;
   food = 500;
 
-  speed = 5;
+  speed = 10;
 
   eat_rate = 1;
   energy_rate = 2;
@@ -12,6 +12,7 @@ class Ant {
 
   vel = [random(-1, 1), random(-1, 1)];
   dead = false;
+  last_move = Date.now();
   constructor(x = random(0, width), y = random(0, height)) {
     this.x = x;
     this.y = y;
@@ -20,7 +21,12 @@ class Ant {
   move() {
     // this.food -= 1;
 
-    let vel = bindVector(this.vel[0], this.vel[1], this.speed);
+    let vel = bindVector(
+      this.vel[0],
+      this.vel[1],
+      (this.speed * (Date.now() - this.last_move)) / 100
+    );
+    this.last_move = Date.now();
     this.x += vel[0];
     this.y += vel[1];
 
@@ -48,7 +54,6 @@ class Ant {
       fill(99, 202, 216);
       ellipse(this.x, this.y, this.size, this.size);
       fill(0);
-      text(this.food, this.x, this.y);
     }
   }
 
@@ -57,6 +62,22 @@ class Ant {
       food.consume(this.eat_rate);
       this.food += this.energy_rate;
       this.size = clamp(this.food / 100, 50, 75);
+    }
+  }
+
+  drawClosest(points: Point[]) {
+    let d: { ant: Ant; dist: number }[] = [];
+    for (const point of points) {
+      let p = point.data;
+      if (p != this) {
+        d.push({ ant: p, dist: dist(this.x, this.y, p.x, p.y) });
+      }
+    }
+    d.sort((a, b) => (a.dist > b.dist ? 1 : -1));
+
+    for (let i = 0; i < min(5, d.length); i++) {
+      let c = d[i];
+      // line(this.x, this.y, c.ant.x, c.ant.y);
     }
   }
 }
