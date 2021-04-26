@@ -1,13 +1,9 @@
 let cnv: p5.Renderer;
 let moveUpdate = Date.now();
 
-let num_food = 100;
 let depos: Food[] = [];
 
-let num_ants = 500;
 let ants: Ant[] = [];
-
-let size = 5000;
 
 function setup() {
   cnv = createCanvas(size, size * (windowHeight / windowWidth));
@@ -28,41 +24,6 @@ function draw() {
   background(128, 175, 73);
 
   gen_grid_lines();
-
-  for (let i = 0; i < depos.length; i++) {
-    let f = depos[i];
-    f.show();
-    if (f.capacity <= 20) {
-      depos[i] = new Food();
-    }
-  }
-
-  let qtree = QuadTree.create();
-  for (let a of ants) {
-    let point = new Point(a.x, a.y, a);
-    qtree.insert(point);
-    if (!a.dead) {
-      a.show();
-
-      //if overlapping, consume
-      for (const f of depos) {
-        if (dist(a.x, a.y, f.x, f.y) <= (a.size + f.capacity) / 2) {
-          a.eat(f);
-        }
-      }
-
-      if (a.food <= 0) {
-        a.dead = true;
-      }
-      a.move();
-    }
-  }
-  stroke(255, 0, 0);
-  strokeWeight(3);
-  for (let a of ants) {
-    let range = new Circle(a.x, a.y, 100);
-    let points = qtree.query(range);
-
-    a.drawClosest(points);
-  }
+  show_food();
+  doAnts();
 }

@@ -1,6 +1,3 @@
-let min_food_size = 100;
-let max_food_size = 300;
-
 class Food {
   x: number;
   y: number;
@@ -16,10 +13,8 @@ class Food {
   }
 
   show() {
-    stroke(40, 64, 14);
     strokeWeight(this.capacity / 5);
 
-    fill(62, 93, 33);
     ellipse(this.x, this.y, this.capacity, this.capacity);
   }
 
@@ -29,6 +24,19 @@ class Food {
     }
     if (this.capacity < 0) {
       this.capacity = 0;
+    }
+  }
+}
+
+function show_food() {
+  stroke(40, 64, 14);
+
+  fill(62, 93, 33);
+  for (let i = 0; i < depos.length; i++) {
+    let f = depos[i];
+    f.show();
+    if (f.capacity <= 20) {
+      depos[i] = new Food();
     }
   }
 }
