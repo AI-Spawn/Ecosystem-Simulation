@@ -9,54 +9,68 @@ class Ant {
 
   max_food = max_food;
 
-  vel = bindVector(random(-1, 1), random(-1, 1));
+  angle = random(0, PI * 2);
+  // vel = bindVector(random(-1, 1), random(-1, 1));
   dead = false;
   last_move = Date.now();
+  target_food = depos[0];
   constructor(x = random(0, width), y = random(0, height)) {
     this.x = x;
     this.y = y;
-    this.x = width / 2;
-    this.y = height / 2;
+    // this.x = width / 2;
+    // this.y = height / 2;
+  }
+  spend(amount: number) {
+    this.food -= amount;
+  }
+  move() {
+    let time_scale = Date.now() - this.last_move;
+    time_scale = 10;
+    let vel = bindVector(
+      cos(this.angle),
+      sin(this.angle),
+      (this.speed * time_scale) / 100
+    );
+    this.last_move = Date.now();
+    this.x += vel[0];
+    this.y += vel[1];
+
+    if (
+      this.x < this.size / 2 ||
+      this.x > width - this.size / 2 ||
+      this.y < this.size / 2 ||
+      this.y > height - this.size / 2
+    ) {
+      // this.angle += PI;
+      this.x = clamp(this.x, this.size / 2, width - this.size / 2);
+      this.y = clamp(this.y, this.size / 2, height - this.size / 2);
+    }
+
+    if (!(depos.indexOf(this.target_food) > -1)) {
+      this.target_food = random(depos);
+    }
   }
 
-  // move() {
-  //   this.food -= move_energy;
-  //   let time_scale = Date.now() - this.last_move;
-  //   time_scale = 10;
-  //   let vel = bindVector(
-  //     this.vel[0],
-  //     this.vel[1],
-  //     (this.speed * time_scale) / 100
-  //   );
-  //   this.last_move = Date.now();
-  //   this.x += vel[0];
-  //   this.y += vel[1];
-
-  //   if (this.x < this.size / 2 || this.x > width - this.size / 2) {
-  //     this.vel[0] *= -1;
-  //     this.x = clamp(this.x, this.size / 2, width - this.size / 2);
-  //   }
-
-  //   if (this.y < this.size / 2 || this.y > height - this.size / 2) {
-  //     this.vel[1] *= -1;
-  //     this.y = clamp(this.y, this.size / 2, height - this.size / 2);
-  //   }
-  // }
-
   goto(x: number, y: number) {
-    let bob = bindVector(this.vel[0], this.vel[1]);
-    let angle = Math.atan2(bob[1], bob[0]);
-    let target_angle = 90;
+    let target_x = x - this.x;
+    let target_y = y - this.y;
+    let target_angle = atan2(target_y, target_x) % (2 * PI);
+    this.angle %= 2 * PI;
 
-    angle = angle > target_angle + turn_speed ? angle - turn_speed : angle;
-    angle = angle < target_angle - turn_speed ? angle + turn_speed : angle;
-
-    this.vel = [1, tan(angle), 1];
-    console.log(int((angle * 180) / Math.PI));
+    target_angle =
+      Math.abs(target_angle - this.angle) >
+      Math.abs(target_angle - 2 * PI - this.angle)
+        ? target_angle - 2 * PI
+        : target_angle;
+    this.angle +=
+      turn_speed /
+      ((target_angle - this.angle) / Math.abs(target_angle - this.angle));
   }
 
   show() {
     if (!this.dead) {
+      stroke(0);
+
       ellipse(this.x, this.y, this.size, this.size);
       text(int(this.food), this.x, this.y);
     }
@@ -65,8 +79,8 @@ class Ant {
       line(
         this.x,
         this.y,
-        this.x + this.vel[0] * 100,
-        this.y + this.vel[1] * 100
+        this.x + cos(this.angle) * 100,
+        this.y + sin(this.angle) * 100
       );
     }
   }
@@ -99,28 +113,33 @@ class Ant {
 function doAnts() {
   let qtree = QuadTree.create();
   strokeWeight(2);
-  stroke(0);
 
   fill(47, 185, 161);
   for (let a of ants) {
-    // a.move();
-    a.goto(depos[0].x, depos[0].y);
+    a.goto(a.target_food.x, a.target_food.y);
     let point = new Point(a.x, a.y, a);
     qtree.insert(point);
     if (!a.dead) {
-      a.show();
-
       //if overlapping, consume
+      let eating = false;
       for (const f of depos) {
         if (dist(a.x, a.y, f.x, f.y) <= (a.size + f.capacity) / 2) {
           a.eat(f);
+          a.spend(move_energy / 2);
+
+          eating = true;
         }
+      }
+      if (!eating) {
+        a.move();
+        a.spend(move_energy);
       }
 
       if (a.food <= 0) {
         a.dead = true;
       }
     }
+    a.show();
   }
   stroke(255, 0, 0);
   strokeWeight(3);

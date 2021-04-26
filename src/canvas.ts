@@ -13,7 +13,9 @@ function setup() {
     depos.push(new Food());
   }
   for (let i = 0; i < num_ants; i++) {
-    ants.push(new Ant());
+    let a = new Ant();
+    a.target_food = random(depos);
+    ants.push(a);
   }
   textAlign(CENTER, CENTER);
 }

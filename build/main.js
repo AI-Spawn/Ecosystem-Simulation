@@ -5,31 +5,57 @@ class Ant {
         this.food = start_food;
         this.speed = ant_speed;
         this.max_food = max_food;
-        this.vel = bindVector(random(-1, 1), random(-1, 1));
+        this.angle = random(0, PI * 2);
         this.dead = false;
         this.last_move = Date.now();
+        this.target_food = depos[0];
         this.x = x;
         this.y = y;
-        this.x = width / 2;
-        this.y = height / 2;
+    }
+    spend(amount) {
+        this.food -= amount;
+    }
+    move() {
+        let time_scale = Date.now() - this.last_move;
+        time_scale = 10;
+        let vel = bindVector(cos(this.angle), sin(this.angle), (this.speed * time_scale) / 100);
+        this.last_move = Date.now();
+        this.x += vel[0];
+        this.y += vel[1];
+        if (this.x < this.size / 2 ||
+            this.x > width - this.size / 2 ||
+            this.y < this.size / 2 ||
+            this.y > height - this.size / 2) {
+            this.x = clamp(this.x, this.size / 2, width - this.size / 2);
+            this.y = clamp(this.y, this.size / 2, height - this.size / 2);
+        }
+        if (!(depos.indexOf(this.target_food) > -1)) {
+            this.target_food = random(depos);
+        }
     }
     goto(x, y) {
-        let bob = bindVector(this.vel[0], this.vel[1]);
-        let angle = Math.atan2(bob[1], bob[0]);
-        let target_angle = 90;
-        angle = angle > target_angle + turn_speed ? angle - turn_speed : angle;
-        angle = angle < target_angle - turn_speed ? angle + turn_speed : angle;
-        this.vel = [1, tan(angle), 1];
-        console.log(int((angle * 180) / Math.PI));
+        let target_x = x - this.x;
+        let target_y = y - this.y;
+        let target_angle = atan2(target_y, target_x) % (2 * PI);
+        this.angle %= 2 * PI;
+        target_angle =
+            Math.abs(target_angle - this.angle) >
+                Math.abs(target_angle - 2 * PI - this.angle)
+                ? target_angle - 2 * PI
+                : target_angle;
+        this.angle +=
+            turn_speed /
+                ((target_angle - this.angle) / Math.abs(target_angle - this.angle));
     }
     show() {
         if (!this.dead) {
+            stroke(0);
             ellipse(this.x, this.y, this.size, this.size);
             text(int(this.food), this.x, this.y);
         }
         if (show_vel) {
             stroke(255, 0, 0);
-            line(this.x, this.y, this.x + this.vel[0] * 100, this.y + this.vel[1] * 100);
+            line(this.x, this.y, this.x + cos(this.angle) * 100, this.y + sin(this.angle) * 100);
         }
     }
     eat(food) {
@@ -57,23 +83,29 @@ class Ant {
 function doAnts() {
     let qtree = QuadTree.create();
     strokeWeight(2);
-    stroke(0);
     fill(47, 185, 161);
     for (let a of ants) {
-        a.goto(depos[0].x, depos[0].y);
+        a.goto(a.target_food.x, a.target_food.y);
         let point = new Point(a.x, a.y, a);
         qtree.insert(point);
         if (!a.dead) {
-            a.show();
+            let eating = false;
             for (const f of depos) {
                 if (dist(a.x, a.y, f.x, f.y) <= (a.size + f.capacity) / 2) {
                     a.eat(f);
+                    a.spend(move_energy / 2);
+                    eating = true;
                 }
+            }
+            if (!eating) {
+                a.move();
+                a.spend(move_energy);
             }
             if (a.food <= 0) {
                 a.dead = true;
             }
         }
+        a.show();
     }
     stroke(255, 0, 0);
     strokeWeight(3);
@@ -85,8 +117,6 @@ function doAnts() {
     ants = ants.filter((a) => !a.dead);
 }
 function bindVector(x, y, magnitude = 1) {
-    x *= 100 * magnitude;
-    y *= 100 * magnitude;
     if (x != 0 || y != 0) {
         let scaler = magnitude / Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
         x *= scaler;
@@ -115,7 +145,9 @@ function setup() {
         depos.push(new Food());
     }
     for (let i = 0; i < num_ants; i++) {
-        ants.push(new Ant());
+        let a = new Ant();
+        a.target_food = random(depos);
+        ants.push(a);
     }
     textAlign(CENTER, CENTER);
 }
@@ -129,12 +161,12 @@ function draw() {
 }
 let size = 3000;
 let show_vel = true;
-let num_food = 1;
+let num_food = 10;
 let min_food_size = 100;
 let max_food_size = 300;
-let num_ants = 1;
-let turn_speed = 0.01;
-let move_energy = 0;
+let num_ants = 10;
+let turn_speed = (5 * Math.PI) / 180;
+let move_energy = 0.1;
 let eat_rate = 1;
 let energy_rate = 2;
 let start_food = 500;
