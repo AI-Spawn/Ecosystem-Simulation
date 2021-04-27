@@ -118,8 +118,10 @@ class Ant {
   show() {
     if (!this.dead) {
       stroke(0);
+      fill(47, 185, 161);
 
       ellipse(this.x, this.y, this.size, this.size);
+      fill(0);
       text(int(this.food), this.x, this.y);
     }
     if (show_vel) {
@@ -162,7 +164,6 @@ function doAnts() {
   let qtree = QuadTree.create();
   strokeWeight(2);
 
-  fill(47, 185, 161);
   for (let a of ants) {
     if (!a.dead) {
       let point = new Point(a.x, a.y, a);

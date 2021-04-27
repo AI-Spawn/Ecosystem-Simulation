@@ -95,7 +95,9 @@ class Ant {
     show() {
         if (!this.dead) {
             stroke(0);
+            fill(47, 185, 161);
             ellipse(this.x, this.y, this.size, this.size);
+            fill(0);
             text(int(this.food), this.x, this.y);
         }
         if (show_vel) {
@@ -128,7 +130,6 @@ class Ant {
 function doAnts() {
     let qtree = QuadTree.create();
     strokeWeight(2);
-    fill(47, 185, 161);
     for (let a of ants) {
         if (!a.dead) {
             let point = new Point(a.x, a.y, a);
@@ -196,7 +197,7 @@ function draw() {
         qtree.insert(point);
     }
     for (const a of ants) {
-        let range = new Circle(a.x, a.y, vision_range);
+        let range = new Circle(a.x, a.y, vision_range + max_food_size);
         let nearby = qtree.query(range);
         for (const food of nearby) {
             let f = food.data;
@@ -206,27 +207,28 @@ function draw() {
                 data: f,
                 time_made: tick,
             };
-            if (!a.hasThot(t)) {
+            if (!a.hasThot(t) &&
+                dist(a.x, a.y, t.x, t.y) - f.capacity < vision_range) {
                 a.thoughts.unshift(t);
             }
         }
     }
 }
-let size = 3000;
-let show_vel = true;
+let size = 2000;
+let show_vel = false;
 let num_food = 10;
 let min_food_size = 100;
 let max_food_size = 300;
-let num_ants = 10;
+let num_ants = 100;
 let turn_speed = (5 * Math.PI) / 180;
-let move_energy = 0.1;
+let move_energy = 1;
 let eat_rate = 1;
-let energy_rate = 2;
-let start_food = 500;
-let max_food = 10000000000000000000;
+let energy_rate = 3;
+let start_food = 100;
+let max_food = 1000;
 let ant_speed = 70;
-let vision_range = 200;
-let shout_range = 500;
+let vision_range = 100;
+let shout_range = 300;
 let exist_time = 200;
 class Food {
     constructor(x = random(0, width), y = random(0, height), c = random(min_food_size, max_food_size)) {
