@@ -2,44 +2,113 @@
 class Ant {
     constructor(x = random(0, width), y = random(0, height)) {
         this.size = 50;
-        this.food = 500;
-        this.speed = 10;
-        this.eat_rate = 1;
-        this.energy_rate = 2;
-        this.max_food = 1000;
-        this.vel = [random(-1, 1), random(-1, 1)];
+        this.food = start_food;
+        this.speed = ant_speed;
+        this.max_food = max_food;
+        this.angle = random(0, PI * 2);
         this.dead = false;
         this.last_move = Date.now();
+        this.thoughts = [];
         this.x = x;
         this.y = y;
     }
+    tell(ants) {
+        let thoughts = this.thoughts.filter((t) => t.time_made + exist_time > tick);
+        for (const ant of ants) {
+            const a = ant.data;
+            for (const t of this.thoughts) {
+                if (!a.hasThot(t)) {
+                    a.thoughts.unshift(t);
+                }
+            }
+        }
+    }
+    spend(amount) {
+        this.food -= amount;
+    }
+    think() {
+        for (let t = 0; t < this.thoughts.length; t++) {
+            if (this.thoughts[t].time_made + exist_time * 2 < tick) {
+                this.thoughts.splice(t, t);
+            }
+        }
+        let thoughts = this.thoughts.filter((t) => t.time_made + exist_time > tick);
+        if (thoughts.length > 0) {
+            this.goto(thoughts[0].x, thoughts[0].y);
+        }
+        let eating = false;
+        for (const f of depos) {
+            if (dist(this.x, this.y, f.x, f.y) <= (this.size + f.capacity) / 2) {
+                this.eat(f);
+                this.spend(move_energy);
+                eating = true;
+            }
+        }
+        if (!eating) {
+            this.move();
+            this.spend(move_energy);
+        }
+        if (this.food <= 0) {
+            this.dead = true;
+        }
+    }
     move() {
-        let vel = bindVector(this.vel[0], this.vel[1], (this.speed * (Date.now() - this.last_move)) / 100);
+        let time_scale = Date.now() - this.last_move;
+        time_scale = 10;
+        let vel = bindVector(cos(this.angle), sin(this.angle), (this.speed * time_scale) / 100);
         this.last_move = Date.now();
         this.x += vel[0];
         this.y += vel[1];
         if (this.x < this.size / 2 || this.x > width - this.size / 2) {
-            this.vel[0] *= -1;
+            this.angle += 2 * (PI / 2 - this.angle);
             this.x = clamp(this.x, this.size / 2, width - this.size / 2);
+            this.y = clamp(this.y, this.size / 2, height - this.size / 2);
         }
         if (this.y < this.size / 2 || this.y > height - this.size / 2) {
-            this.vel[1] *= -1;
+            this.angle += 2 * (PI - this.angle);
+            this.x = clamp(this.x, this.size / 2, width - this.size / 2);
             this.y = clamp(this.y, this.size / 2, height - this.size / 2);
         }
     }
+    hasThot(t) {
+        for (let thought of this.thoughts) {
+            if (thought.data === t.data) {
+                return true;
+            }
+        }
+        return false;
+    }
+    goto(x, y) {
+        let target_x = x - this.x;
+        let target_y = y - this.y;
+        let target_angle = atan2(target_y, target_x) % (2 * PI);
+        this.angle %= 2 * PI;
+        target_angle =
+            Math.abs(target_angle - this.angle) >
+                Math.abs(target_angle - 2 * PI - this.angle)
+                ? target_angle - 2 * PI
+                : target_angle;
+        this.angle +=
+            turn_speed /
+                ((target_angle - this.angle) / Math.abs(target_angle - this.angle));
+    }
     show() {
         if (!this.dead) {
-            strokeWeight(2);
             stroke(0);
             fill(47, 185, 161);
             ellipse(this.x, this.y, this.size, this.size);
             fill(0);
+            text(int(this.food), this.x, this.y);
+        }
+        if (show_vel) {
+            stroke(255, 0, 0);
+            line(this.x, this.y, this.x + cos(this.angle) * 100, this.y + sin(this.angle) * 100);
         }
     }
     eat(food) {
         if (this.food < this.max_food) {
-            food.consume(this.eat_rate);
-            this.food += this.energy_rate;
+            food.consume(eat_rate);
+            this.food += energy_rate;
             this.size = clamp(this.food / 100, 50, 75);
         }
     }
@@ -58,9 +127,28 @@ class Ant {
         }
     }
 }
+function doAnts() {
+    let qtree = QuadTree.create();
+    strokeWeight(2);
+    for (let a of ants) {
+        if (!a.dead) {
+            let point = new Point(a.x, a.y, a);
+            qtree.insert(point);
+            a.think();
+            a.show();
+        }
+    }
+    stroke(255, 0, 0);
+    strokeWeight(3);
+    for (let a of ants) {
+        let range = new Circle(a.x, a.y, shout_range);
+        let points = qtree.query(range);
+        a.tell(points);
+        a.drawClosest(points);
+    }
+    ants = ants.filter((a) => !a.dead);
+}
 function bindVector(x, y, magnitude = 1) {
-    x *= 100 * magnitude;
-    y *= 100 * magnitude;
     if (x != 0 || y != 0) {
         let scaler = magnitude / Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
         x *= scaler;
@@ -80,11 +168,9 @@ function dc(obj) {
 }
 let cnv;
 let moveUpdate = Date.now();
-let num_food = 100;
 let depos = [];
-let num_ants = 500;
 let ants = [];
-let size = 5000;
+let tick = 0;
 function setup() {
     cnv = createCanvas(size, size * (windowHeight / windowWidth));
     cnv.position(0, 0);
@@ -92,49 +178,58 @@ function setup() {
         depos.push(new Food());
     }
     for (let i = 0; i < num_ants; i++) {
-        ants.push(new Ant());
+        let a = new Ant();
+        ants.push(a);
     }
     textAlign(CENTER, CENTER);
 }
 function draw() {
+    tick++;
     clear();
     scale(windowWidth / size);
     background(128, 175, 73);
     gen_grid_lines();
-    for (let i = 0; i < depos.length; i++) {
-        let f = depos[i];
-        f.show();
-        if (f.capacity <= 20) {
-            depos[i] = new Food();
-        }
-    }
+    show_food();
+    doAnts();
     let qtree = QuadTree.create();
-    for (let a of ants) {
-        let point = new Point(a.x, a.y, a);
+    for (const f of depos) {
+        let point = new Point(f.x, f.y, f);
         qtree.insert(point);
-        if (!a.dead) {
-            a.show();
-            for (const f of depos) {
-                if (dist(a.x, a.y, f.x, f.y) <= (a.size + f.capacity) / 2) {
-                    a.eat(f);
-                }
-            }
-            if (a.food <= 0) {
-                a.dead = true;
-            }
-            a.move();
-        }
     }
-    stroke(255, 0, 0);
-    strokeWeight(3);
-    for (let a of ants) {
-        let range = new Circle(a.x, a.y, 100);
-        let points = qtree.query(range);
-        a.drawClosest(points);
+    for (const a of ants) {
+        let range = new Circle(a.x, a.y, vision_range + max_food_size);
+        let nearby = qtree.query(range);
+        for (const food of nearby) {
+            let f = food.data;
+            let t = {
+                x: f.x,
+                y: f.y,
+                data: f,
+                time_made: tick,
+            };
+            if (!a.hasThot(t) &&
+                dist(a.x, a.y, t.x, t.y) - f.capacity < vision_range) {
+                a.thoughts.unshift(t);
+            }
+        }
     }
 }
+let size = 2000;
+let show_vel = false;
+let num_food = 10;
 let min_food_size = 100;
 let max_food_size = 300;
+let num_ants = 100;
+let turn_speed = (5 * Math.PI) / 180;
+let move_energy = 1;
+let eat_rate = 1;
+let energy_rate = 3;
+let start_food = 100;
+let max_food = 1000;
+let ant_speed = 70;
+let vision_range = 100;
+let shout_range = 300;
+let exist_time = 200;
 class Food {
     constructor(x = random(0, width), y = random(0, height), c = random(min_food_size, max_food_size)) {
         this.x = x;
@@ -142,9 +237,7 @@ class Food {
         this.capacity = c;
     }
     show() {
-        stroke(40, 64, 14);
         strokeWeight(this.capacity / 5);
-        fill(62, 93, 33);
         ellipse(this.x, this.y, this.capacity, this.capacity);
     }
     consume(amount) {
@@ -153,6 +246,17 @@ class Food {
         }
         if (this.capacity < 0) {
             this.capacity = 0;
+        }
+    }
+}
+function show_food() {
+    stroke(40, 64, 14);
+    fill(62, 93, 33);
+    for (let i = 0; i < depos.length; i++) {
+        let f = depos[i];
+        f.show();
+        if (f.capacity <= 20) {
+            depos[i] = new Food();
         }
     }
 }
