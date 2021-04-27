@@ -23,5 +23,13 @@ let move_energy = 0.1;
 let eat_rate = 1;
 let energy_rate = 2;
 let start_food = 500;
-let max_food = 1000;
+let max_food = 10000000000000000000;
 let ant_speed = 70;
+
+let vision_range = 200;
+let shout_range = 500;
+
+//////////////
+// thoughts //
+//////////////
+let exist_time = 200;

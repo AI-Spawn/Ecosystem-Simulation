@@ -10,18 +10,61 @@ class Ant {
   max_food = max_food;
 
   angle = random(0, PI * 2);
-  // vel = bindVector(random(-1, 1), random(-1, 1));
+
   dead = false;
   last_move = Date.now();
-  target_food = depos[0];
+  thoughts: Thought[] = [];
   constructor(x = random(0, width), y = random(0, height)) {
     this.x = x;
     this.y = y;
     // this.x = width / 2;
     // this.y = height / 2;
   }
+  tell(ants: Point[]) {
+    let thoughts = this.thoughts.filter((t) => t.time_made + exist_time > tick);
+    for (const ant of ants) {
+      const a = ant.data;
+      for (const t of this.thoughts) {
+        if (!a.hasThot(t)) {
+          // let new_thought: Thought = JSON.parse(JSON.stringify(t));
+          // new_thought.time_made = tick;
+          a.thoughts.unshift(t);
+        }
+      }
+    }
+  }
+
   spend(amount: number) {
     this.food -= amount;
+  }
+  think() {
+    for (let t = 0; t < this.thoughts.length; t++) {
+      if (this.thoughts[t].time_made + exist_time * 2 < tick) {
+        this.thoughts.splice(t, t);
+      }
+    }
+    let thoughts = this.thoughts.filter((t) => t.time_made + exist_time > tick);
+    if (thoughts.length > 0) {
+      this.goto(thoughts[0].x, thoughts[0].y);
+    }
+    //if overlapping, consume
+    let eating = false;
+    for (const f of depos) {
+      if (dist(this.x, this.y, f.x, f.y) <= (this.size + f.capacity) / 2) {
+        this.eat(f);
+        this.spend(move_energy);
+
+        eating = true;
+      }
+    }
+    if (!eating) {
+      this.move();
+      this.spend(move_energy);
+    }
+
+    if (this.food <= 0) {
+      this.dead = true;
+    }
   }
   move() {
     let time_scale = Date.now() - this.last_move;
@@ -35,20 +78,25 @@ class Ant {
     this.x += vel[0];
     this.y += vel[1];
 
-    if (
-      this.x < this.size / 2 ||
-      this.x > width - this.size / 2 ||
-      this.y < this.size / 2 ||
-      this.y > height - this.size / 2
-    ) {
-      // this.angle += PI;
+    if (this.x < this.size / 2 || this.x > width - this.size / 2) {
+      this.angle += 2 * (PI / 2 - this.angle);
       this.x = clamp(this.x, this.size / 2, width - this.size / 2);
       this.y = clamp(this.y, this.size / 2, height - this.size / 2);
     }
-
-    if (!(depos.indexOf(this.target_food) > -1)) {
-      this.target_food = random(depos);
+    if (this.y < this.size / 2 || this.y > height - this.size / 2) {
+      this.angle += 2 * (PI - this.angle);
+      this.x = clamp(this.x, this.size / 2, width - this.size / 2);
+      this.y = clamp(this.y, this.size / 2, height - this.size / 2);
     }
+  }
+
+  hasThot(t: Thought) {
+    for (let thought of this.thoughts) {
+      if (thought.data === t.data) {
+        return true;
+      }
+    }
+    return false;
   }
 
   goto(x: number, y: number) {
@@ -116,37 +164,20 @@ function doAnts() {
 
   fill(47, 185, 161);
   for (let a of ants) {
-    a.goto(a.target_food.x, a.target_food.y);
-    let point = new Point(a.x, a.y, a);
-    qtree.insert(point);
     if (!a.dead) {
-      //if overlapping, consume
-      let eating = false;
-      for (const f of depos) {
-        if (dist(a.x, a.y, f.x, f.y) <= (a.size + f.capacity) / 2) {
-          a.eat(f);
-          a.spend(move_energy / 2);
-
-          eating = true;
-        }
-      }
-      if (!eating) {
-        a.move();
-        a.spend(move_energy);
-      }
-
-      if (a.food <= 0) {
-        a.dead = true;
-      }
+      let point = new Point(a.x, a.y, a);
+      qtree.insert(point);
+      a.think();
+      a.show();
     }
-    a.show();
   }
   stroke(255, 0, 0);
   strokeWeight(3);
   for (let a of ants) {
-    let range = new Circle(a.x, a.y, 100);
+    let range = new Circle(a.x, a.y, shout_range);
     let points = qtree.query(range);
 
+    a.tell(points);
     a.drawClosest(points);
   }
 
