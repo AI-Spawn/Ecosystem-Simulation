@@ -25,9 +25,7 @@ class Ant {
     for (const ant of ants) {
       const a = ant.data;
       for (const t of this.thoughts) {
-        if (!a.hasThot(t)) {
-          // let new_thought: Thought = JSON.parse(JSON.stringify(t));
-          // new_thought.time_made = tick;
+        if (!a.hasThot(t)[0]) {
           a.thoughts.unshift(t);
         }
       }
@@ -90,13 +88,19 @@ class Ant {
     }
   }
 
-  hasThot(t: Thought) {
+  hasThot(t: Thought): [Boolean, Thought] {
     for (let thought of this.thoughts) {
       if (thought.data === t.data) {
-        return true;
+        return [true, thought];
       }
     }
-    return false;
+    let placeholder_thought: Thought = {
+      x: 0,
+      y: 0,
+      time_made: 0,
+      data: new Food(),
+    };
+    return [false, placeholder_thought];
   }
 
   goto(x: number, y: number) {

@@ -17,7 +17,7 @@ class Ant {
         for (const ant of ants) {
             const a = ant.data;
             for (const t of this.thoughts) {
-                if (!a.hasThot(t)) {
+                if (!a.hasThot(t)[0]) {
                     a.thoughts.unshift(t);
                 }
             }
@@ -73,10 +73,16 @@ class Ant {
     hasThot(t) {
         for (let thought of this.thoughts) {
             if (thought.data === t.data) {
-                return true;
+                return [true, thought];
             }
         }
-        return false;
+        let placeholder_thought = {
+            x: 0,
+            y: 0,
+            time_made: 0,
+            data: new Food(),
+        };
+        return [false, placeholder_thought];
     }
     goto(x, y) {
         let target_x = x - this.x;
@@ -197,7 +203,7 @@ function draw() {
         qtree.insert(point);
     }
     for (const a of ants) {
-        let range = new Circle(a.x, a.y, vision_range + max_food_size);
+        let range = new Circle(a.x, a.y, (vision_range + max_food_size) / 2);
         let nearby = qtree.query(range);
         for (const food of nearby) {
             let f = food.data;
@@ -207,29 +213,34 @@ function draw() {
                 data: f,
                 time_made: tick,
             };
-            if (!a.hasThot(t) &&
-                dist(a.x, a.y, t.x, t.y) - f.capacity < vision_range) {
-                a.thoughts.unshift(t);
+            if (dist(a.x, a.y, t.x, t.y) - f.capacity < vision_range / 2) {
+                let ht = a.hasThot(t);
+                if (ht[0]) {
+                    ht[1].time_made = tick;
+                }
+                else {
+                    a.thoughts.unshift(t);
+                }
             }
         }
     }
 }
 let size = 2000;
 let show_vel = false;
-let num_food = 10;
+let num_food = 5;
 let min_food_size = 100;
 let max_food_size = 300;
-let num_ants = 100;
+let num_ants = 10;
 let turn_speed = (5 * Math.PI) / 180;
 let move_energy = 1;
 let eat_rate = 1;
 let energy_rate = 3;
-let start_food = 100;
+let start_food = 500;
 let max_food = 1000;
-let ant_speed = 70;
-let vision_range = 100;
+let ant_speed = 100;
+let vision_range = 200;
 let shout_range = 300;
-let exist_time = 200;
+let exist_time = 100;
 class Food {
     constructor(x = random(0, width), y = random(0, height), c = random(min_food_size, max_food_size)) {
         this.x = x;

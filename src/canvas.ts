@@ -37,7 +37,7 @@ function draw() {
     qtree.insert(point);
   }
   for (const a of ants) {
-    let range = new Circle(a.x, a.y, vision_range + max_food_size);
+    let range = new Circle(a.x, a.y, (vision_range + max_food_size) / 2);
     let nearby = qtree.query(range);
     for (const food of nearby) {
       let f: Food = food.data;
@@ -47,11 +47,13 @@ function draw() {
         data: f,
         time_made: tick,
       };
-      if (
-        !a.hasThot(t) &&
-        dist(a.x, a.y, t.x, t.y) - f.capacity < vision_range
-      ) {
-        a.thoughts.unshift(t);
+      if (dist(a.x, a.y, t.x, t.y) - f.capacity < vision_range / 2) {
+        let ht = a.hasThot(t);
+        if (ht[0]) {
+          ht[1].time_made = tick;
+        } else {
+          a.thoughts.unshift(t);
+        }
       }
     }
   }
