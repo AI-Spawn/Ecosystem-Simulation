@@ -53,6 +53,7 @@ function draw() {
           ht[1].time_made = tick;
         } else {
           a.thoughts.unshift(t);
+          console.log(a.thoughts);
         }
       }
     }

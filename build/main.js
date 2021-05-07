@@ -13,28 +13,19 @@ class Ant {
         this.y = y;
     }
     tell(ants) {
-        let thoughts = this.thoughts.filter((t) => t.time_made + exist_time > tick);
-        for (const ant of ants) {
-            const a = ant.data;
-            for (const t of this.thoughts) {
-                if (!a.hasThot(t)[0]) {
-                    a.thoughts.unshift(t);
-                }
-            }
-        }
     }
     spend(amount) {
         this.food -= amount;
     }
     think() {
-        for (let t = 0; t < this.thoughts.length; t++) {
-            if (this.thoughts[t].time_made + exist_time * 2 < tick) {
-                this.thoughts.splice(t, t);
-            }
-        }
         let thoughts = this.thoughts.filter((t) => t.time_made + exist_time > tick);
+        thoughts.sort((a, b) => {
+            return dist(this.x, this.y, a.x, a.y) < dist(this.x, this.y, b.x, b.y)
+                ? 1
+                : -1;
+        });
         if (thoughts.length > 0) {
-            this.goto(thoughts[0].x, thoughts[0].y);
+            this.turn_to(thoughts[0].x, thoughts[0].y);
         }
         let eating = false;
         for (const f of depos) {
@@ -84,19 +75,20 @@ class Ant {
         };
         return [false, placeholder_thought];
     }
-    goto(x, y) {
+    turn_to(x, y) {
         let target_x = x - this.x;
         let target_y = y - this.y;
         let target_angle = atan2(target_y, target_x) % (2 * PI);
         this.angle %= 2 * PI;
-        target_angle =
-            Math.abs(target_angle - this.angle) >
-                Math.abs(target_angle - 2 * PI - this.angle)
-                ? target_angle - 2 * PI
-                : target_angle;
-        this.angle +=
-            turn_speed /
-                ((target_angle - this.angle) / Math.abs(target_angle - this.angle));
+        let diff = target_angle - this.angle;
+        let dir = 1;
+        if (diff < 0)
+            diff += 360;
+        if (diff > 180)
+            dir = -1;
+        if (diff > turn_speed) {
+            this.angle += turn_speed * dir;
+        }
     }
     show() {
         if (!this.dead) {
@@ -105,6 +97,10 @@ class Ant {
             ellipse(this.x, this.y, this.size, this.size);
             fill(0);
             text(int(this.food), this.x, this.y);
+        }
+        if (show_vision) {
+            fill(255, 255, 255, 70);
+            ellipse(this.x, this.y, vision_range, vision_range);
         }
         if (show_vel) {
             stroke(255, 0, 0);
@@ -220,17 +216,19 @@ function draw() {
                 }
                 else {
                     a.thoughts.unshift(t);
+                    console.log(a.thoughts);
                 }
             }
         }
     }
 }
-let size = 2000;
+let size = 3000;
 let show_vel = false;
+let show_vision = true;
 let num_food = 5;
 let min_food_size = 100;
 let max_food_size = 300;
-let num_ants = 10;
+let num_ants = 1;
 let turn_speed = (5 * Math.PI) / 180;
 let move_energy = 1;
 let eat_rate = 1;
