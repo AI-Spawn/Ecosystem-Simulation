@@ -17,59 +17,9 @@ class Ant {
   constructor(x = random(0, width), y = random(0, height)) {
     this.x = x;
     this.y = y;
-    // this.x = width / 2;
-    // this.y = height / 2;
-  }
-  tell(ants: Point[]) {
-    // let thoughts = this.thoughts.filter((t) => t.time_made + exist_time > tick);
-    // for (const ant of ants) {
-    //   const a = ant.data;
-    //   for (const t of this.thoughts) {
-    //     if (!a.hasThot(t)[0]) {
-    //       a.thoughts.unshift(t);
-    //     }
-    //   }
-    // }
   }
 
-  spend(amount: number) {
-    this.food -= amount;
-  }
-  think() {
-    // for (let t = 0; t < this.thoughts.length; t++) {
-    //   if (this.thoughts[t].time_made + exist_time * 2 < tick) {
-    //     this.thoughts.splice(t, t);
-    //   }
-    // }
-    let thoughts = this.thoughts.filter((t) => t.time_made + exist_time > tick);
-    thoughts.sort((a, b) => {
-      return dist(this.x, this.y, a.x, a.y) < dist(this.x, this.y, b.x, b.y)
-        ? 1
-        : -1;
-    });
-    if (thoughts.length > 0) {
-      this.turn_to(thoughts[0].x, thoughts[0].y);
-    }
-
-    //if overlapping, consume
-    let eating = false;
-    for (const f of depos) {
-      if (dist(this.x, this.y, f.x, f.y) <= (this.size + f.capacity) / 2) {
-        this.eat(f);
-        this.spend(move_energy);
-
-        eating = true;
-      }
-    }
-    if (!eating) {
-      this.move();
-      this.spend(move_energy);
-    }
-
-    if (this.food <= 0) {
-      this.dead = true;
-    }
-  }
+  think() {}
   move() {
     let time_scale = Date.now() - this.last_move;
     time_scale = 10;
@@ -117,8 +67,8 @@ class Ant {
 
     let diff = target_angle - this.angle;
     let dir = 1;
-    if (diff < 0) diff += 360;
-    if (diff > 180) dir = -1; // left turn
+    if (diff < 0) diff += 2 * PI;
+    if (diff > PI) dir = -1; // left turn
 
     if (diff > turn_speed) {
       this.angle += turn_speed * dir;
@@ -126,6 +76,7 @@ class Ant {
   }
 
   show() {
+    strokeWeight(2);
     if (!this.dead) {
       stroke(0);
       fill(47, 185, 161);
@@ -157,43 +108,22 @@ class Ant {
     }
   }
 
-  drawClosest(points: Point[]) {
-    let d: { ant: Ant; dist: number }[] = [];
-    for (const point of points) {
-      let p = point.data;
-      if (p != this) {
-        d.push({ ant: p, dist: dist(this.x, this.y, p.x, p.y) });
-      }
-    }
-    d.sort((a, b) => (a.dist > b.dist ? 1 : -1));
-
-    for (let i = 0; i < min(2, d.length); i++) {
-      let c = d[i];
-      line(this.x, this.y, c.ant.x, c.ant.y);
-    }
-  }
+  drawClosest(points: Point[]) {}
 }
 
 function doAnts() {
   let qtree = QuadTree.create();
-  strokeWeight(2);
 
   for (let a of ants) {
     if (!a.dead) {
       let point = new Point(a.x, a.y, a);
       qtree.insert(point);
-      a.think();
-      a.show();
     }
   }
-  stroke(255, 0, 0);
-  strokeWeight(3);
   for (let a of ants) {
-    let range = new Circle(a.x, a.y, shout_range);
-    let points = qtree.query(range);
-
-    a.tell(points);
-    a.drawClosest(points);
+    a.turn_to(mouseX, mouseY);
+    a.move();
+    a.show();
   }
 
   //delete dead ants

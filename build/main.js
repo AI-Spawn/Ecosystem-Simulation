@@ -12,37 +12,7 @@ class Ant {
         this.x = x;
         this.y = y;
     }
-    tell(ants) {
-    }
-    spend(amount) {
-        this.food -= amount;
-    }
-    think() {
-        let thoughts = this.thoughts.filter((t) => t.time_made + exist_time > tick);
-        thoughts.sort((a, b) => {
-            return dist(this.x, this.y, a.x, a.y) < dist(this.x, this.y, b.x, b.y)
-                ? 1
-                : -1;
-        });
-        if (thoughts.length > 0) {
-            this.turn_to(thoughts[0].x, thoughts[0].y);
-        }
-        let eating = false;
-        for (const f of depos) {
-            if (dist(this.x, this.y, f.x, f.y) <= (this.size + f.capacity) / 2) {
-                this.eat(f);
-                this.spend(move_energy);
-                eating = true;
-            }
-        }
-        if (!eating) {
-            this.move();
-            this.spend(move_energy);
-        }
-        if (this.food <= 0) {
-            this.dead = true;
-        }
-    }
+    think() { }
     move() {
         let time_scale = Date.now() - this.last_move;
         time_scale = 10;
@@ -83,14 +53,15 @@ class Ant {
         let diff = target_angle - this.angle;
         let dir = 1;
         if (diff < 0)
-            diff += 360;
-        if (diff > 180)
+            diff += 2 * PI;
+        if (diff > PI)
             dir = -1;
         if (diff > turn_speed) {
             this.angle += turn_speed * dir;
         }
     }
     show() {
+        strokeWeight(2);
         if (!this.dead) {
             stroke(0);
             fill(47, 185, 161);
@@ -114,39 +85,20 @@ class Ant {
             this.size = clamp(this.food / 100, 50, 75);
         }
     }
-    drawClosest(points) {
-        let d = [];
-        for (const point of points) {
-            let p = point.data;
-            if (p != this) {
-                d.push({ ant: p, dist: dist(this.x, this.y, p.x, p.y) });
-            }
-        }
-        d.sort((a, b) => (a.dist > b.dist ? 1 : -1));
-        for (let i = 0; i < min(2, d.length); i++) {
-            let c = d[i];
-            line(this.x, this.y, c.ant.x, c.ant.y);
-        }
-    }
+    drawClosest(points) { }
 }
 function doAnts() {
     let qtree = QuadTree.create();
-    strokeWeight(2);
     for (let a of ants) {
         if (!a.dead) {
             let point = new Point(a.x, a.y, a);
             qtree.insert(point);
-            a.think();
-            a.show();
         }
     }
-    stroke(255, 0, 0);
-    strokeWeight(3);
     for (let a of ants) {
-        let range = new Circle(a.x, a.y, shout_range);
-        let points = qtree.query(range);
-        a.tell(points);
-        a.drawClosest(points);
+        a.turn_to(mouseX, mouseY);
+        a.move();
+        a.show();
     }
     ants = ants.filter((a) => !a.dead);
 }
@@ -187,48 +139,19 @@ function setup() {
 }
 function draw() {
     tick++;
-    clear();
     scale(windowWidth / size);
     background(128, 175, 73);
     gen_grid_lines();
     show_food();
     doAnts();
-    let qtree = QuadTree.create();
-    for (const f of depos) {
-        let point = new Point(f.x, f.y, f);
-        qtree.insert(point);
-    }
-    for (const a of ants) {
-        let range = new Circle(a.x, a.y, (vision_range + max_food_size) / 2);
-        let nearby = qtree.query(range);
-        for (const food of nearby) {
-            let f = food.data;
-            let t = {
-                x: f.x,
-                y: f.y,
-                data: f,
-                time_made: tick,
-            };
-            if (dist(a.x, a.y, t.x, t.y) - f.capacity < vision_range / 2) {
-                let ht = a.hasThot(t);
-                if (ht[0]) {
-                    ht[1].time_made = tick;
-                }
-                else {
-                    a.thoughts.unshift(t);
-                    console.log(a.thoughts);
-                }
-            }
-        }
-    }
 }
-let size = 3000;
+let size = 2000;
 let show_vel = false;
 let show_vision = true;
 let num_food = 5;
 let min_food_size = 100;
 let max_food_size = 300;
-let num_ants = 1;
+let num_ants = 2;
 let turn_speed = (5 * Math.PI) / 180;
 let move_energy = 1;
 let eat_rate = 1;

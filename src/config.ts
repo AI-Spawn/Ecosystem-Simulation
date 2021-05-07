@@ -1,7 +1,7 @@
 ///////////////
 // sim setup //
 ///////////////
-let size = 3000;
+let size = 2000;
 let show_vel = false;
 let show_vision = true;
 
@@ -16,7 +16,7 @@ let max_food_size = 300;
 //////////
 // ants //
 //////////
-let num_ants = 1;
+let num_ants = 2;
 
 let turn_speed = (5 * Math.PI) / 180;
 
