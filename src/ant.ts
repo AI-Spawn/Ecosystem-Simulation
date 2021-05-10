@@ -2,7 +2,7 @@ class Ant {
   x: number;
   y: number;
 
-  size = 50;
+  size = 25;
   food = start_food;
 
   speed = ant_speed;
@@ -19,7 +19,30 @@ class Ant {
     this.y = y;
   }
 
-  think() {}
+  think() {
+    // this.turn_to(mouseX, mouseY);
+    if (dist(mouseX, mouseY, this.x, this.y) > vision_range / 2) {
+      this.move();
+    }
+    this.show();
+
+    let depo: Food = this.get_closest(depos);
+    line(depo.x, depo.y, this.x, this.y);
+  }
+  get_closest(items: Food[]): Food {
+    let ans = items[0];
+    let ld = dist(ans.x, ans.y, this.x, this.y);
+
+    for (let f = 0; f < items.length; f++) {
+      let i = items[f];
+      let d = dist(i.x, i.y, this.x, this.y) - i.capacity;
+      if (d <= ld) {
+        ans = i;
+      }
+    }
+
+    return ans;
+  }
   move() {
     let time_scale = Date.now() - this.last_move;
     time_scale = 10;
@@ -32,15 +55,13 @@ class Ant {
     this.x += vel[0];
     this.y += vel[1];
 
-    if (this.x < this.size / 2 || this.x > width - this.size / 2) {
-      this.angle += 2 * (PI / 2 - this.angle);
-      this.x = clamp(this.x, this.size / 2, width - this.size / 2);
-      this.y = clamp(this.y, this.size / 2, height - this.size / 2);
+    if (this.x < this.size || this.x > width - this.size) {
+      this.angle += 2 * ((3 * PI) / 2 - this.angle);
+      this.x = clamp(this.x, this.size, width - this.size);
     }
-    if (this.y < this.size / 2 || this.y > height - this.size / 2) {
-      this.angle += 2 * (PI - this.angle);
-      this.x = clamp(this.x, this.size / 2, width - this.size / 2);
-      this.y = clamp(this.y, this.size / 2, height - this.size / 2);
+    if (this.y < this.size || this.y > height - this.size) {
+      this.angle += 2 * -this.angle;
+      this.y = clamp(this.y, this.size, height - this.size);
     }
   }
 
@@ -121,9 +142,7 @@ function doAnts() {
     }
   }
   for (let a of ants) {
-    a.turn_to(mouseX, mouseY);
-    a.move();
-    a.show();
+    a.think();
   }
 
   //delete dead ants

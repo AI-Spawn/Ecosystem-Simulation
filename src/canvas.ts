@@ -19,6 +19,7 @@ function setup() {
     ants.push(a);
   }
   textAlign(CENTER, CENTER);
+  ellipseMode(RADIUS);
 }
 function draw() {
   tick++;

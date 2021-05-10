@@ -1,7 +1,7 @@
 "use strict";
 class Ant {
     constructor(x = random(0, width), y = random(0, height)) {
-        this.size = 50;
+        this.size = 25;
         this.food = start_food;
         this.speed = ant_speed;
         this.max_food = max_food;
@@ -12,7 +12,26 @@ class Ant {
         this.x = x;
         this.y = y;
     }
-    think() { }
+    think() {
+        if (dist(mouseX, mouseY, this.x, this.y) > vision_range / 2) {
+            this.move();
+        }
+        this.show();
+        let depo = this.get_closest(depos);
+        line(depo.x, depo.y, this.x, this.y);
+    }
+    get_closest(items) {
+        let ans = items[0];
+        let ld = dist(ans.x, ans.y, this.x, this.y);
+        for (let f = 0; f < items.length; f++) {
+            let i = items[f];
+            let d = dist(i.x, i.y, this.x, this.y) - i.capacity;
+            if (d <= ld) {
+                ans = i;
+            }
+        }
+        return ans;
+    }
     move() {
         let time_scale = Date.now() - this.last_move;
         time_scale = 10;
@@ -20,15 +39,13 @@ class Ant {
         this.last_move = Date.now();
         this.x += vel[0];
         this.y += vel[1];
-        if (this.x < this.size / 2 || this.x > width - this.size / 2) {
-            this.angle += 2 * (PI / 2 - this.angle);
-            this.x = clamp(this.x, this.size / 2, width - this.size / 2);
-            this.y = clamp(this.y, this.size / 2, height - this.size / 2);
+        if (this.x < this.size || this.x > width - this.size) {
+            this.angle += 2 * ((3 * PI) / 2 - this.angle);
+            this.x = clamp(this.x, this.size, width - this.size);
         }
-        if (this.y < this.size / 2 || this.y > height - this.size / 2) {
-            this.angle += 2 * (PI - this.angle);
-            this.x = clamp(this.x, this.size / 2, width - this.size / 2);
-            this.y = clamp(this.y, this.size / 2, height - this.size / 2);
+        if (this.y < this.size || this.y > height - this.size) {
+            this.angle += 2 * -this.angle;
+            this.y = clamp(this.y, this.size, height - this.size);
         }
     }
     hasThot(t) {
@@ -96,9 +113,7 @@ function doAnts() {
         }
     }
     for (let a of ants) {
-        a.turn_to(mouseX, mouseY);
-        a.move();
-        a.show();
+        a.think();
     }
     ants = ants.filter((a) => !a.dead);
 }
@@ -136,6 +151,7 @@ function setup() {
         ants.push(a);
     }
     textAlign(CENTER, CENTER);
+    ellipseMode(RADIUS);
 }
 function draw() {
     tick++;
@@ -149,8 +165,8 @@ let size = 2000;
 let show_vel = false;
 let show_vision = true;
 let num_food = 5;
-let min_food_size = 100;
-let max_food_size = 300;
+let min_food_size = 50;
+let max_food_size = 150;
 let num_ants = 2;
 let turn_speed = (5 * Math.PI) / 180;
 let move_energy = 1;
@@ -159,7 +175,7 @@ let energy_rate = 3;
 let start_food = 500;
 let max_food = 1000;
 let ant_speed = 100;
-let vision_range = 200;
+let vision_range = 100;
 let shout_range = 300;
 let exist_time = 100;
 class Food {
@@ -169,7 +185,7 @@ class Food {
         this.capacity = c;
     }
     show() {
-        strokeWeight(this.capacity / 5);
+        strokeWeight(this.capacity / 2.5);
         ellipse(this.x, this.y, this.capacity, this.capacity);
     }
     consume(amount) {

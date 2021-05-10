@@ -10,8 +10,8 @@ let show_vision = true;
 //////////
 let num_food = 5;
 
-let min_food_size = 100;
-let max_food_size = 300;
+let min_food_size = 50;
+let max_food_size = 150;
 
 //////////
 // ants //
@@ -27,7 +27,7 @@ let start_food = 500;
 let max_food = 1000;
 let ant_speed = 100;
 
-let vision_range = 200;
+let vision_range = 100;
 let shout_range = 300;
 
 //////////////

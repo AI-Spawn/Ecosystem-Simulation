@@ -13,7 +13,7 @@ class Food {
   }
 
   show() {
-    strokeWeight(this.capacity / 5);
+    strokeWeight(this.capacity / 2.5);
 
     ellipse(this.x, this.y, this.capacity, this.capacity);
   }
