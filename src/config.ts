@@ -2,7 +2,7 @@
 // sim setup //
 ///////////////
 let size = 2000;
-let show_vel = false;
+let show_vel = true;
 let show_vision = true;
 
 //////////

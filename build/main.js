@@ -13,12 +13,25 @@ class Ant {
         this.y = y;
     }
     think() {
-        if (dist(mouseX, mouseY, this.x, this.y) > vision_range / 2) {
-            this.move();
-        }
+        this.move();
         this.show();
-        let depo = this.get_closest(depos);
-        line(depo.x, depo.y, this.x, this.y);
+        let [depo, dist] = this.get_closest(depos);
+        if (dist < vision_range) {
+            line(depo.x, depo.y, this.x, this.y);
+            let thought = {
+                x: depo.x,
+                y: depo.y,
+                time_made: tick,
+                data: depo,
+            };
+            if (!this.hasThot(thought)[0]) {
+                this.thoughts.unshift(thought);
+            }
+        }
+        if (this.thoughts.length >= 1) {
+            let t = this.thoughts[0];
+            this.turn_to(t.x, t.y);
+        }
     }
     get_closest(items) {
         let ans = items[0];
@@ -27,10 +40,11 @@ class Ant {
             let i = items[f];
             let d = dist(i.x, i.y, this.x, this.y) - i.capacity;
             if (d <= ld) {
+                ld = d;
                 ans = i;
             }
         }
-        return ans;
+        return [ans, ld];
     }
     move() {
         let time_scale = Date.now() - this.last_move;
@@ -162,7 +176,7 @@ function draw() {
     doAnts();
 }
 let size = 2000;
-let show_vel = false;
+let show_vel = true;
 let show_vision = true;
 let num_food = 5;
 let min_food_size = 50;
