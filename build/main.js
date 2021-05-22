@@ -1,10 +1,15 @@
 "use strict";
 class Ant {
     constructor(x = random(0, width), y = random(0, height)) {
+        this.color = getColor();
+        this.learning_rate = 1.1;
         this.size = 25;
         this.food = start_food;
         this.speed = ant_speed;
+        this.move_energy = move_energy;
         this.max_food = birth_food;
+        this.shout_range = shout_range;
+        this.vision_range = vision_range;
         this.angle = random(0, PI * 2);
         this.dead = false;
         this.last_move = Date.now();
@@ -14,7 +19,7 @@ class Ant {
     }
     think() {
         let [depo, dist] = this.get_closest_food(depos);
-        if (dist < vision_range) {
+        if (dist < this.vision_range) {
             let thought = {
                 x: depo.x,
                 y: depo.y,
@@ -49,7 +54,7 @@ class Ant {
         }
         else {
             this.move();
-            this.food -= move_energy;
+            this.food -= this.move_energy;
             if (this.food < 0) {
                 this.dead = true;
             }
@@ -80,7 +85,7 @@ class Ant {
             let point = new Point(a.x, a.y, a);
             qtree.insert(point);
         }
-        let range = new Circle(this.x, this.y, shout_range);
+        let range = new Circle(this.x, this.y, this.shout_range);
         let closest = qtree.query(range);
         return closest;
     }
@@ -149,15 +154,17 @@ class Ant {
         strokeWeight(2);
         if (!this.dead) {
             stroke(0);
-            fill(47, 185, 161);
+            colorMode(HSL);
+            fill(this.color);
+            colorMode(RGB);
             ellipse(this.x, this.y, this.size, this.size);
             fill(0);
             text(int(this.food), this.x, this.y);
         }
         if (show_vision) {
             fill(255, 255, 255, 20);
-            ellipse(this.x, this.y, vision_range, vision_range);
-            ellipse(this.x, this.y, shout_range, shout_range);
+            ellipse(this.x, this.y, this.vision_range, this.vision_range);
+            ellipse(this.x, this.y, this.shout_range, this.shout_range);
         }
         if (show_vel) {
             stroke(255, 0, 0);
@@ -227,6 +234,15 @@ function draw() {
     show_food();
     doAnts();
     depos.filter((depo) => depo.capacity > 0);
+}
+function getColor() {
+    const randomInt = (min, max) => {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    };
+    var h = randomInt(0, 360);
+    var s = randomInt(42, 98);
+    var l = randomInt(40, 90);
+    return [h, s, l];
 }
 let size = 2000;
 let show_vel = true;

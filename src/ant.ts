@@ -2,18 +2,24 @@ class Ant {
   x: number;
   y: number;
 
+  color = getColor();
+  learning_rate = 1.1;
+
   size = 25;
   food = start_food;
 
   speed = ant_speed;
-
+  move_energy = move_energy;
   max_food = birth_food;
+  shout_range = shout_range;
+  vision_range = vision_range;
 
   angle = random(0, PI * 2);
 
   dead = false;
   last_move = Date.now();
   thoughts: Thought[] = [];
+
   constructor(x = random(0, width), y = random(0, height)) {
     this.x = x;
     this.y = y;
@@ -21,7 +27,7 @@ class Ant {
 
   think() {
     let [depo, dist] = this.get_closest_food(depos);
-    if (dist < vision_range) {
+    if (dist < this.vision_range) {
       let thought: Thought = {
         x: depo.x,
         y: depo.y,
@@ -58,7 +64,7 @@ class Ant {
       }
     } else {
       this.move();
-      this.food -= move_energy;
+      this.food -= this.move_energy;
       if (this.food < 0) {
         this.dead = true;
       }
@@ -90,7 +96,7 @@ class Ant {
       let point = new Point(a.x, a.y, a);
       qtree.insert(point);
     }
-    let range = new Circle(this.x, this.y, shout_range);
+    let range = new Circle(this.x, this.y, this.shout_range);
     let closest = qtree.query(range);
     return closest;
   }
@@ -169,16 +175,17 @@ class Ant {
     strokeWeight(2);
     if (!this.dead) {
       stroke(0);
-      fill(47, 185, 161);
-
+      colorMode(HSL);
+      fill(this.color);
+      colorMode(RGB);
       ellipse(this.x, this.y, this.size, this.size);
       fill(0);
       text(int(this.food), this.x, this.y);
     }
     if (show_vision) {
       fill(255, 255, 255, 20);
-      ellipse(this.x, this.y, vision_range, vision_range);
-      ellipse(this.x, this.y, shout_range, shout_range);
+      ellipse(this.x, this.y, this.vision_range, this.vision_range);
+      ellipse(this.x, this.y, this.shout_range, this.shout_range);
     }
     if (show_vel) {
       stroke(255, 0, 0);
