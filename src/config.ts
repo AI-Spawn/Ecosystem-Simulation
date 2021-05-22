@@ -10,15 +10,15 @@ let show_vision = true;
 //////////
 let num_food = 5;
 
-let min_food_size = 50;
-let max_food_size = 150;
+let min_food_size = 25;
+let max_food_size = 75;
 
 //////////
 // ants //
 //////////
-let num_ants = 2;
+let num_ants = 5;
 
-let turn_speed = (5 * Math.PI) / 180;
+let turn_speed = (10 * Math.PI) / 180;
 
 let move_energy = 1;
 let eat_rate = 1;

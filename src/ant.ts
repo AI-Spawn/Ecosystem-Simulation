@@ -20,12 +20,8 @@ class Ant {
   }
 
   think() {
-    this.move();
-    this.show();
-
     let [depo, dist] = this.get_closest(depos);
     if (dist < vision_range) {
-      line(depo.x, depo.y, this.x, this.y);
       let thought: Thought = {
         x: depo.x,
         y: depo.y,
@@ -34,6 +30,8 @@ class Ant {
       };
       if (!this.hasThot(thought)[0]) {
         this.thoughts.unshift(thought);
+      } else {
+        this.hasThot(thought)[1].time_made = tick;
       }
     }
 
@@ -41,14 +39,32 @@ class Ant {
       let t = this.thoughts[0];
       this.turn_to(t.x, t.y);
     }
+
+    this.forget();
+    //if in range eat depo
+    if (dist < 0) {
+      depo.capacity -= eat_rate;
+      this.food += energy_rate;
+    } else {
+      this.move();
+    }
+
+    this.show();
   }
+
+  forget() {
+    this.thoughts = this.thoughts.filter((t) => {
+      tick - t.time_made < exist_time;
+    });
+  }
+
   get_closest(items: Food[]): [Food, number] {
     let ans = items[0];
     let ld = dist(ans.x, ans.y, this.x, this.y);
 
     for (let f = 0; f < items.length; f++) {
       let i = items[f];
-      let d = dist(i.x, i.y, this.x, this.y) - i.capacity;
+      let d = dist(i.x, i.y, this.x, this.y) - i.capacity - this.size;
       if (d <= ld) {
         ld = d;
         ans = i;
@@ -107,6 +123,8 @@ class Ant {
 
     if (diff > turn_speed) {
       this.angle += turn_speed * dir;
+    } else {
+      this.angle = target_angle;
     }
   }
 

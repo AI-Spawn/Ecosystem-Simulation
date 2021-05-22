@@ -13,11 +13,8 @@ class Ant {
         this.y = y;
     }
     think() {
-        this.move();
-        this.show();
         let [depo, dist] = this.get_closest(depos);
         if (dist < vision_range) {
-            line(depo.x, depo.y, this.x, this.y);
             let thought = {
                 x: depo.x,
                 y: depo.y,
@@ -27,18 +24,35 @@ class Ant {
             if (!this.hasThot(thought)[0]) {
                 this.thoughts.unshift(thought);
             }
+            else {
+                this.hasThot(thought)[1].time_made = tick;
+            }
         }
         if (this.thoughts.length >= 1) {
             let t = this.thoughts[0];
             this.turn_to(t.x, t.y);
         }
+        this.forget();
+        if (dist < 0) {
+            depo.capacity -= eat_rate;
+            this.food += energy_rate;
+        }
+        else {
+            this.move();
+        }
+        this.show();
+    }
+    forget() {
+        this.thoughts = this.thoughts.filter((t) => {
+            tick - t.time_made < exist_time;
+        });
     }
     get_closest(items) {
         let ans = items[0];
         let ld = dist(ans.x, ans.y, this.x, this.y);
         for (let f = 0; f < items.length; f++) {
             let i = items[f];
-            let d = dist(i.x, i.y, this.x, this.y) - i.capacity;
+            let d = dist(i.x, i.y, this.x, this.y) - i.capacity - this.size;
             if (d <= ld) {
                 ld = d;
                 ans = i;
@@ -89,6 +103,9 @@ class Ant {
             dir = -1;
         if (diff > turn_speed) {
             this.angle += turn_speed * dir;
+        }
+        else {
+            this.angle = target_angle;
         }
     }
     show() {
@@ -174,15 +191,16 @@ function draw() {
     gen_grid_lines();
     show_food();
     doAnts();
+    depos.filter((depo) => depo.capacity > 0);
 }
 let size = 2000;
 let show_vel = true;
 let show_vision = true;
 let num_food = 5;
-let min_food_size = 50;
-let max_food_size = 150;
-let num_ants = 2;
-let turn_speed = (5 * Math.PI) / 180;
+let min_food_size = 25;
+let max_food_size = 75;
+let num_ants = 5;
+let turn_speed = (10 * Math.PI) / 180;
 let move_energy = 1;
 let eat_rate = 1;
 let energy_rate = 3;
@@ -199,8 +217,10 @@ class Food {
         this.capacity = c;
     }
     show() {
-        strokeWeight(this.capacity / 2.5);
-        ellipse(this.x, this.y, this.capacity, this.capacity);
+        fill(40, 64, 14);
+        ellipse(this.x, this.y, this.capacity * 2, this.capacity * 2);
+        fill(62, 93, 33);
+        ellipse(this.x, this.y, (this.capacity * 2 * 7) / 10, (this.capacity * 2 * 7) / 10);
     }
     consume(amount) {
         if (amount > 0) {
@@ -212,8 +232,7 @@ class Food {
     }
 }
 function show_food() {
-    stroke(40, 64, 14);
-    fill(62, 93, 33);
+    strokeWeight(0);
     for (let i = 0; i < depos.length; i++) {
         let f = depos[i];
         f.show();

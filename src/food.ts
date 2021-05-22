@@ -13,9 +13,15 @@ class Food {
   }
 
   show() {
-    strokeWeight(this.capacity / 2.5);
-
-    ellipse(this.x, this.y, this.capacity, this.capacity);
+    fill(40, 64, 14);
+    ellipse(this.x, this.y, this.capacity * 2, this.capacity * 2);
+    fill(62, 93, 33);
+    ellipse(
+      this.x,
+      this.y,
+      (this.capacity * 2 * 7) / 10,
+      (this.capacity * 2 * 7) / 10
+    );
   }
 
   consume(amount: number) {
@@ -29,9 +35,7 @@ class Food {
 }
 
 function show_food() {
-  stroke(40, 64, 14);
-
-  fill(62, 93, 33);
+  strokeWeight(0);
   for (let i = 0; i < depos.length; i++) {
     let f = depos[i];
     f.show();

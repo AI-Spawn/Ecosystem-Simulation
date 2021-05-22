@@ -30,4 +30,5 @@ function draw() {
   gen_grid_lines();
   show_food();
   doAnts();
+  depos.filter((depo) => depo.capacity > 0);
 }
