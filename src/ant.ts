@@ -7,7 +7,7 @@ class Ant {
 
   speed = ant_speed;
 
-  max_food = max_food;
+  max_food = birth_food;
 
   angle = random(0, PI * 2);
 
@@ -40,18 +40,44 @@ class Ant {
       this.turn_to(t.x, t.y);
     }
 
+    this.communicate();
+
     this.forget();
     //if in range eat depo
     if (dist < 0) {
       depo.capacity -= eat_rate;
       this.food += energy_rate;
+      if (this.food >= this.max_food) {
+        this.food -= birth_energy;
+        for (let i = 0; i < random(litter_min, litter_max); i++) {
+          let spawn = new Ant();
+          spawn.x = this.x;
+          spawn.y = this.y;
+          ants.push(spawn);
+        }
+      }
     } else {
       this.move();
+      this.food -= move_energy;
+      if (this.food < 0) {
+        this.dead = true;
+      }
     }
-    this.get_closest_ants(ants);
     this.show();
   }
-
+  communicate() {
+    let closest = this.get_closest_ants(ants);
+    this.drawClosest(closest);
+    for (let t of this.thoughts) {
+      for (const p of closest) {
+        const a: Ant = p.data;
+        let has = a.hasThot(t);
+        if (!has[0] && tick - t.time_made < exist_time) {
+          a.thoughts.unshift(t);
+        }
+      }
+    }
+  }
   forget() {
     this.thoughts = this.thoughts.filter((t) => {
       tick - t.time_made < exist_time;
@@ -66,7 +92,7 @@ class Ant {
     }
     let range = new Circle(this.x, this.y, shout_range);
     let closest = qtree.query(range);
-    this.drawClosest(closest);
+    return closest;
   }
 
   get_closest_food(items: Food[]): [Food, number] {

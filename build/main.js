@@ -4,7 +4,7 @@ class Ant {
         this.size = 25;
         this.food = start_food;
         this.speed = ant_speed;
-        this.max_food = max_food;
+        this.max_food = birth_food;
         this.angle = random(0, PI * 2);
         this.dead = false;
         this.last_move = Date.now();
@@ -32,16 +32,42 @@ class Ant {
             let t = this.thoughts[0];
             this.turn_to(t.x, t.y);
         }
+        this.communicate();
         this.forget();
         if (dist < 0) {
             depo.capacity -= eat_rate;
             this.food += energy_rate;
+            if (this.food >= this.max_food) {
+                this.food -= birth_energy;
+                for (let i = 0; i < random(litter_min, litter_max); i++) {
+                    let spawn = new Ant();
+                    spawn.x = this.x;
+                    spawn.y = this.y;
+                    ants.push(spawn);
+                }
+            }
         }
         else {
             this.move();
+            this.food -= move_energy;
+            if (this.food < 0) {
+                this.dead = true;
+            }
         }
-        this.get_closest_ants(ants);
         this.show();
+    }
+    communicate() {
+        let closest = this.get_closest_ants(ants);
+        this.drawClosest(closest);
+        for (let t of this.thoughts) {
+            for (const p of closest) {
+                const a = p.data;
+                let has = a.hasThot(t);
+                if (!has[0] && tick - t.time_made < exist_time) {
+                    a.thoughts.unshift(t);
+                }
+            }
+        }
     }
     forget() {
         this.thoughts = this.thoughts.filter((t) => {
@@ -56,7 +82,7 @@ class Ant {
         }
         let range = new Circle(this.x, this.y, shout_range);
         let closest = qtree.query(range);
-        this.drawClosest(closest);
+        return closest;
     }
     get_closest_food(items) {
         let ans = items[0];
@@ -204,17 +230,20 @@ function draw() {
 }
 let size = 2000;
 let show_vel = true;
-let show_vision = true;
+let show_vision = false;
 let num_food = 5;
 let min_food_size = 25;
 let max_food_size = 75;
 let num_ants = 5;
 let turn_speed = (10 * Math.PI) / 180;
+let start_food = 1000;
+let birth_food = 1200;
+let birth_energy = 400;
+let litter_min = 2;
+let litter_max = 7;
 let move_energy = 1;
 let eat_rate = 1;
-let energy_rate = 3;
-let start_food = 500;
-let max_food = 1000;
+let energy_rate = 10;
 let ant_speed = 100;
 let vision_range = 100;
 let shout_range = 300;
