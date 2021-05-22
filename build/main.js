@@ -13,7 +13,7 @@ class Ant {
         this.y = y;
     }
     think() {
-        let [depo, dist] = this.get_closest(depos);
+        let [depo, dist] = this.get_closest_food(depos);
         if (dist < vision_range) {
             let thought = {
                 x: depo.x,
@@ -40,6 +40,7 @@ class Ant {
         else {
             this.move();
         }
+        this.get_closest_ants(ants);
         this.show();
     }
     forget() {
@@ -47,7 +48,17 @@ class Ant {
             tick - t.time_made < exist_time;
         });
     }
-    get_closest(items) {
+    get_closest_ants(an) {
+        let qtree = QuadTree.create();
+        for (const a of an) {
+            let point = new Point(a.x, a.y, a);
+            qtree.insert(point);
+        }
+        let range = new Circle(this.x, this.y, shout_range);
+        let closest = qtree.query(range);
+        this.drawClosest(closest);
+    }
+    get_closest_food(items) {
         let ans = items[0];
         let ld = dist(ans.x, ans.y, this.x, this.y);
         for (let f = 0; f < items.length; f++) {
@@ -118,8 +129,9 @@ class Ant {
             text(int(this.food), this.x, this.y);
         }
         if (show_vision) {
-            fill(255, 255, 255, 70);
+            fill(255, 255, 255, 20);
             ellipse(this.x, this.y, vision_range, vision_range);
+            ellipse(this.x, this.y, shout_range, shout_range);
         }
         if (show_vel) {
             stroke(255, 0, 0);
@@ -133,16 +145,13 @@ class Ant {
             this.size = clamp(this.food / 100, 50, 75);
         }
     }
-    drawClosest(points) { }
-}
-function doAnts() {
-    let qtree = QuadTree.create();
-    for (let a of ants) {
-        if (!a.dead) {
-            let point = new Point(a.x, a.y, a);
-            qtree.insert(point);
+    drawClosest(points) {
+        for (const a of points) {
+            line(this.x, this.y, a.x, a.y);
         }
     }
+}
+function doAnts() {
     for (let a of ants) {
         a.think();
     }
