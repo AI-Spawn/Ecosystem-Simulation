@@ -1,19 +1,24 @@
 "use strict";
 class Ant {
     constructor(x = random(0, width), y = random(0, height)) {
-        this.color = getColor();
         this.learning_rate = 1.1;
+        this.color = getColor();
+        this.color_change_rate = 1;
         this.size = 25;
         this.food = start_food;
         this.speed = ant_speed;
+        this.speed_change_rate = 2;
         this.move_energy = move_energy;
+        this.move_energy_change_rate = 0.1;
+        this.vision_range = vision_range;
+        this.vision_range_change_rate = 2;
         this.max_food = birth_food;
         this.shout_range = shout_range;
-        this.vision_range = vision_range;
         this.angle = random(0, PI * 2);
         this.dead = false;
         this.last_move = Date.now();
         this.thoughts = [];
+        this.spawn_time = 0;
         this.x = x;
         this.y = y;
     }
@@ -45,9 +50,7 @@ class Ant {
             if (this.food >= this.max_food) {
                 this.food -= birth_energy;
                 for (let i = 0; i < random(litter_min, litter_max); i++) {
-                    let spawn = new Ant();
-                    spawn.x = this.x;
-                    spawn.y = this.y;
+                    let spawn = this.mitosis();
                     ants.push(spawn);
                 }
             }
@@ -149,6 +152,23 @@ class Ant {
         else {
             this.angle = target_angle;
         }
+    }
+    mitosis() {
+        let spawn = new Ant();
+        spawn.x = this.x;
+        spawn.y = this.y;
+        spawn.color = this.color;
+        for (let c = 0; c < spawn.color.length; c++) {
+            spawn.color[c] += random(-this.color_change_rate, this.color_change_rate);
+        }
+        spawn.speed = this.speed;
+        spawn.speed += random(-this.speed_change_rate, this.speed_change_rate);
+        spawn.move_energy = this.move_energy;
+        spawn.move_energy += random(-this.move_energy_change_rate, this.move_energy_change_rate);
+        spawn.vision_range =
+            this.vision_range +
+                random(-this.vision_range_change_rate, this.vision_range_change_rate);
+        return spawn;
     }
     show() {
         strokeWeight(2);

@@ -2,24 +2,32 @@ class Ant {
   x: number;
   y: number;
 
-  color = getColor();
   learning_rate = 1.1;
+
+  color = getColor();
+  color_change_rate = 1;
 
   size = 25;
   food = start_food;
 
   speed = ant_speed;
+  speed_change_rate = 2;
+
   move_energy = move_energy;
+  move_energy_change_rate = 0.1;
+
+  vision_range = vision_range;
+  vision_range_change_rate = 2;
+
   max_food = birth_food;
   shout_range = shout_range;
-  vision_range = vision_range;
 
   angle = random(0, PI * 2);
 
   dead = false;
   last_move = Date.now();
   thoughts: Thought[] = [];
-
+  spawn_time = 0;
   constructor(x = random(0, width), y = random(0, height)) {
     this.x = x;
     this.y = y;
@@ -56,9 +64,7 @@ class Ant {
       if (this.food >= this.max_food) {
         this.food -= birth_energy;
         for (let i = 0; i < random(litter_min, litter_max); i++) {
-          let spawn = new Ant();
-          spawn.x = this.x;
-          spawn.y = this.y;
+          let spawn = this.mitosis();
           ants.push(spawn);
         }
       }
@@ -169,6 +175,32 @@ class Ant {
     } else {
       this.angle = target_angle;
     }
+  }
+
+  mitosis() {
+    let spawn = new Ant();
+
+    spawn.x = this.x;
+    spawn.y = this.y;
+
+    spawn.color = this.color;
+    for (let c = 0; c < spawn.color.length; c++) {
+      spawn.color[c] += random(-this.color_change_rate, this.color_change_rate);
+    }
+
+    spawn.speed = this.speed;
+    spawn.speed += random(-this.speed_change_rate, this.speed_change_rate);
+
+    spawn.move_energy = this.move_energy;
+    spawn.move_energy += random(
+      -this.move_energy_change_rate,
+      this.move_energy_change_rate
+    );
+
+    spawn.vision_range =
+      this.vision_range +
+      random(-this.vision_range_change_rate, this.vision_range_change_rate);
+    return spawn;
   }
 
   show() {

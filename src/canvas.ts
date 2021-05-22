@@ -42,10 +42,4 @@ function getColor() {
   var s = randomInt(42, 98);
   var l = randomInt(40, 90);
   return [h, s, l];
-
-  // return [
-  //   360 * Math.random(),
-  //   25 + 70 * Math.random(),
-  //   85 + 10 * Math.random(),
-  // ];
 }
