@@ -24,10 +24,13 @@ class Ant {
 
   angle = random(0, PI * 2);
 
-  dead = false;
   last_move = Date.now();
   thoughts: Thought[] = [];
+
   spawn_time = 0;
+  death_time = Number.MAX_SAFE_INTEGER;
+  dead = false;
+
   children: Ant[] = [];
   constructor(x = random(0, width), y = random(0, height)) {
     this.x = x;
@@ -75,6 +78,7 @@ class Ant {
       this.food -= this.move_energy;
       if (this.food < 0) {
         this.dead = true;
+        this.death_time = tick;
       }
     }
     this.show();
@@ -206,24 +210,24 @@ class Ant {
   }
 
   show() {
-    strokeWeight(2);
+    pg.strokeWeight(2);
     if (!this.dead) {
-      stroke(0);
-      colorMode(HSL);
-      fill(this.color);
-      colorMode(RGB);
-      ellipse(this.x, this.y, this.size, this.size);
-      fill(0);
-      text(int(this.food), this.x, this.y);
+      pg.stroke(0);
+      pg.colorMode(HSL);
+      pg.fill(this.color);
+      pg.colorMode(RGB);
+      pg.ellipse(this.x, this.y, this.size, this.size);
+      pg.fill(0);
+      pg.text(int(this.food), this.x, this.y);
     }
     if (show_vision) {
-      fill(255, 255, 255, 20);
-      ellipse(this.x, this.y, this.vision_range, this.vision_range);
-      ellipse(this.x, this.y, this.shout_range, this.shout_range);
+      pg.fill(255, 255, 255, 20);
+      pg.ellipse(this.x, this.y, this.vision_range, this.vision_range);
+      pg.ellipse(this.x, this.y, this.shout_range, this.shout_range);
     }
     if (show_vel) {
-      stroke(255, 0, 0);
-      line(
+      pg.stroke(255, 0, 0);
+      pg.line(
         this.x,
         this.y,
         this.x + cos(this.angle) * 100,
@@ -242,7 +246,7 @@ class Ant {
 
   drawClosest(points: Point[]) {
     for (const a of points) {
-      line(this.x, this.y, a.x, a.y);
+      pg.line(this.x, this.y, a.x, a.y);
     }
   }
 }
