@@ -2,6 +2,7 @@ class Ant {
   x: number;
   y: number;
 
+  skill_tree: Skill_Tree;
   learning_rate = 1.1;
 
   color = getColor();
@@ -11,13 +12,10 @@ class Ant {
   food = start_food;
 
   speed = ant_speed;
-  speed_change_rate = 2;
 
   move_energy = move_energy;
-  move_energy_change_rate = 0.1;
 
   vision_range = vision_range;
-  vision_range_change_rate = 2;
 
   max_food = birth_food;
   shout_range = shout_range;
@@ -35,6 +33,16 @@ class Ant {
   constructor(x = random(0, width), y = random(0, height)) {
     this.x = x;
     this.y = y;
+
+    this.skill_tree = {
+      total: 0,
+      speed: 0,
+      move_energy: 0,
+      litter_size: 0,
+      vision_range: 0,
+      eat_rate: 0,
+      energy_rate: 0,
+    };
   }
 
   think() {
@@ -110,7 +118,11 @@ class Ant {
     }
     let range = new Circle(this.x, this.y, this.shout_range);
     let closest = qtree.query(range);
-    return closest;
+    closest = closest.sort((a, b) =>
+      dist(this.x, this.y, a.x, a.y) < dist(this.x, this.y, b.x, b.y) ? 1 : 0
+    );
+
+    return closest.slice(0, min(closest.length, vision_max));
   }
 
   get_closest_food(items: Food[]): [Food, number] {
@@ -128,6 +140,7 @@ class Ant {
 
     return [ans, ld];
   }
+
   move() {
     let time_scale = Date.now() - this.last_move;
     time_scale = 10;
@@ -194,18 +207,25 @@ class Ant {
       spawn.color[c] += random(-this.color_change_rate, this.color_change_rate);
     }
 
-    spawn.speed = this.speed;
-    spawn.speed += random(-this.speed_change_rate, this.speed_change_rate);
+    spawn.skill_tree = this.skill_tree;
 
-    spawn.move_energy = this.move_energy;
-    spawn.move_energy += random(
-      -this.move_energy_change_rate,
-      this.move_energy_change_rate
-    );
+    let pos_mutations = 0;
+    if (
+      random() > pos_mutation_chance &&
+      spawn.skill_tree.total < max_skill_points
+    ) {
+      pos_mutations++;
+      spawn.skill_tree.total++;
 
-    spawn.vision_range =
-      this.vision_range +
-      random(-this.vision_range_change_rate, this.vision_range_change_rate);
+      while (
+        random() > sec_pos_mutation_chance &&
+        spawn.skill_tree.total < max_skill_points
+      ) {
+        pos_mutations++;
+        spawn.skill_tree.total++;
+      }
+    }
+
     return spawn;
   }
 
@@ -250,7 +270,17 @@ class Ant {
     }
   }
 }
+interface Skill_Tree {
+  total: number;
 
+  speed: number;
+  move_energy: number;
+  litter_size: number;
+  vision_range: number;
+
+  eat_rate: number;
+  energy_rate: number;
+}
 function doAnts() {
   for (let a of ants) {
     a.think();

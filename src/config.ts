@@ -6,14 +6,6 @@ let show_vel = true;
 let show_vision = false;
 
 //////////
-// food //
-//////////
-let num_food = 5;
-
-let min_food_size = 25;
-let max_food_size = 75;
-
-//////////
 // ants //
 //////////
 let num_ants = 5;
@@ -33,8 +25,26 @@ let ant_speed = 100;
 
 let vision_range = 100;
 let shout_range = 300;
+let vision_max = 2;
+
+//////////
+// food //
+//////////
+let num_food = 5;
+
+let min_food_size = 25;
+let max_food_size = 75;
 
 //////////////
 // thoughts //
 //////////////
 let exist_time = 100;
+
+///////////////
+// evolution //
+///////////////
+let pos_mutation_chance = 0.5;
+let sec_pos_mutation_chance = 0.2;
+
+let max_skill_points = 100;
+let speed_effect = 2;
