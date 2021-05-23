@@ -8,6 +8,8 @@ let depos: Food[] = [];
 let ants: Ant[] = [];
 let ant_tree: Ant[] = [];
 
+let stats: Stats[] = [];
+
 let tick = 0;
 
 function setup() {
@@ -41,6 +43,10 @@ function draw() {
   image(pg, 0, 0, 1920 * scale, 975 * scale);
   width = 1920;
   height = 975;
+
+  if (tick % record_every == 0) {
+    stats.push(getStats(ants));
+  }
 }
 
 function getColor() {
@@ -58,8 +64,33 @@ function keyPressed() {
   if (key == "s") {
     save(ant_tree, "tree.json");
   }
+
+  if (key == "d") {
+    save(stats, "stats.json");
+  }
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+}
+
+function getStats(ants: Ant[]) {
+  let pop = ants.length;
+  let stats: Stats = {
+    population_size: pop,
+    speed: ants.reduce((a, b) => a + b.speed, 0) / pop,
+    energy_rate: ants.reduce((a, b) => a + b.energy_rate, 0) / pop,
+    vision_range: ants.reduce((a, b) => a + b.vision_range, 0) / pop,
+    turn_speed: ants.reduce((a, b) => a + b.turn_speed, 0) / pop,
+  };
+
+  return stats;
+}
+
+interface Stats {
+  population_size: number;
+  speed: number;
+  energy_rate: number;
+  vision_range: number;
+  turn_speed: number;
 }

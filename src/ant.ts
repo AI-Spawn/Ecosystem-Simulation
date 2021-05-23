@@ -2,25 +2,26 @@ class Ant {
   x: number;
   y: number;
 
+  skill_tree: Skill_Tree;
   learning_rate = 1.1;
 
   color = getColor();
-  color_change_rate = 1;
 
   size = 25;
   food = start_food;
 
   speed = ant_speed;
-  speed_change_rate = 2;
+
+  litter_size = litter_size;
 
   move_energy = move_energy;
-  move_energy_change_rate = 0.1;
-
+  energy_rate = energy_rate;
   vision_range = vision_range;
-  vision_range_change_rate = 2;
 
   max_food = birth_food;
   shout_range = shout_range;
+
+  turn_speed = turn_speed;
 
   angle = random(0, PI * 2);
 
@@ -35,6 +36,18 @@ class Ant {
   constructor(x = random(0, width), y = random(0, height)) {
     this.x = x;
     this.y = y;
+
+    this.skill_tree = {
+      total: 0,
+      stats: new Map(),
+    };
+    let s = this.skill_tree.stats;
+    s.set("speed", 0);
+    s.set("move_energy", 0);
+    s.set("energy_rate", 0);
+    s.set("litter_size", 0);
+    s.set("vision_range", 0);
+    s.set("turn_angle", 0);
   }
 
   think() {
@@ -62,12 +75,20 @@ class Ant {
 
     this.forget();
     //if in range eat depo
-    if (dist < 0) {
+    if (dist < this.size) {
       depo.capacity -= eat_rate;
-      this.food += energy_rate;
+      this.food += this.energy_rate;
       if (this.food >= this.max_food) {
         this.food -= birth_energy;
-        for (let i = 0; i < random(litter_min, litter_max); i++) {
+        for (
+          let i = 0;
+          i <
+          random(
+            this.litter_size - litter_varience,
+            this.litter_size + litter_varience
+          );
+          i++
+        ) {
           let spawn = this.mitosis();
           ants.push(spawn);
           this.children.push(spawn);
@@ -110,7 +131,11 @@ class Ant {
     }
     let range = new Circle(this.x, this.y, this.shout_range);
     let closest = qtree.query(range);
-    return closest;
+    closest = closest.sort((a, b) =>
+      dist(this.x, this.y, a.x, a.y) < dist(this.x, this.y, b.x, b.y) ? 1 : 0
+    );
+
+    return closest.slice(0, min(closest.length, vision_max));
   }
 
   get_closest_food(items: Food[]): [Food, number] {
@@ -128,6 +153,7 @@ class Ant {
 
     return [ans, ld];
   }
+
   move() {
     let time_scale = Date.now() - this.last_move;
     time_scale = 10;
@@ -176,8 +202,8 @@ class Ant {
     if (diff < 0) diff += 2 * PI;
     if (diff > PI) dir = -1; // left turn
 
-    if (diff > turn_speed) {
-      this.angle += turn_speed * dir;
+    if (diff > this.turn_speed) {
+      this.angle += this.turn_speed * dir;
     } else {
       this.angle = target_angle;
     }
@@ -189,23 +215,69 @@ class Ant {
     spawn.x = this.x;
     spawn.y = this.y;
 
-    spawn.color = this.color;
-    for (let c = 0; c < spawn.color.length; c++) {
-      spawn.color[c] += random(-this.color_change_rate, this.color_change_rate);
+    spawn.skill_tree.total = this.skill_tree.total;
+    spawn.skill_tree.stats = new Map(this.skill_tree.stats);
+    let st = spawn.skill_tree.stats;
+
+    let pos_mutations = 0;
+    if (
+      random() > pos_mutation_chance &&
+      spawn.skill_tree.total < max_skill_points
+    ) {
+      pos_mutations++;
+      spawn.skill_tree.total++;
+
+      while (
+        random() > sec_pos_mutation_chance &&
+        spawn.skill_tree.total < max_skill_points
+      ) {
+        pos_mutations++;
+        spawn.skill_tree.total++;
+      }
     }
 
-    spawn.speed = this.speed;
-    spawn.speed += random(-this.speed_change_rate, this.speed_change_rate);
+    //increment skill tree
+    let branches = Array.from(st, ([name, value]) => name);
+    for (let m = 0; m < pos_mutations; m++) {
+      let choice = branches[Math.floor(random() * branches.length)];
+      st.set(
+        choice,
+        //@ts-ignore
+        st.get(choice) + 1
+      );
+    }
 
-    spawn.move_energy = this.move_energy;
-    spawn.move_energy += random(
-      -this.move_energy_change_rate,
-      this.move_energy_change_rate
+    //@ts-ignore
+    spawn.speed += speed_effect * st.get("speed");
+
+    spawn.move_energy -= max(
+      //@ts-ignore
+      move_energy_effect * st.get("move_energy"),
+      this.move_energy - 1
     );
 
-    spawn.vision_range =
-      this.vision_range +
-      random(-this.vision_range_change_rate, this.vision_range_change_rate);
+    //@ts-ignore
+    spawn.energy_rate += energy_rate_effect * st.get("energy_rate");
+
+    spawn.turn_speed +=
+      //@ts-ignore
+      (turn_speed_effect * st.get("turn_angle") * Math.PI) / 180;
+
+    spawn.vision_range +=
+      //@ts-ignore
+      st.get("vision_range") * vision_range_effect;
+
+    spawn.litter_size +=
+      //@ts-ignore
+      st.get("litter_size") * litter_size_effect;
+
+    //color
+    spawn.color = JSON.parse(JSON.stringify(this.color));
+    spawn.color[0] +=
+      random(-color_change_rate, color_change_rate) * pos_mutations;
+
+    spawn.color[0] = clamp(spawn.color[0], 0, 360);
+
     return spawn;
   }
 
@@ -251,6 +323,10 @@ class Ant {
   }
 }
 
+interface Skill_Tree {
+  total: number;
+  stats: Map<string, number>;
+}
 function doAnts() {
   for (let a of ants) {
     a.think();
