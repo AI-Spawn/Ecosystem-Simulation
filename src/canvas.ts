@@ -1,4 +1,6 @@
 let cnv: p5.Renderer;
+let pg: p5.Graphics;
+
 let moveUpdate = Date.now();
 
 let depos: Food[] = [];
@@ -11,6 +13,7 @@ let tick = 0;
 function setup() {
   cnv = createCanvas(windowWidth, windowHeight);
   cnv.position(0, 0);
+  pg = createGraphics(1920, 975);
 
   for (let i = 0; i < num_food; i++) {
     depos.push(new Food());
@@ -20,19 +23,24 @@ function setup() {
     ants.push(a);
     ant_tree.push(a);
   }
-  textAlign(CENTER, CENTER);
-  ellipseMode(RADIUS);
+  pg.textAlign(CENTER, CENTER);
+  pg.ellipseMode(RADIUS);
 }
 function draw() {
   tick++;
-  scale(min(windowWidth / 1920, windowHeight / 975));
 
-  background(128, 175, 73);
+  pg.fill(128, 175, 73);
+  pg.rect(0, 0, 1920, 975);
 
   gen_grid_lines();
   show_food();
   doAnts();
   depos.filter((depo) => depo.capacity > 0);
+
+  let scale = min(windowWidth / 1920, windowHeight / 975);
+  image(pg, 0, 0, 1920 * scale, 975 * scale);
+  width = 1920;
+  height = 975;
 }
 
 function getColor() {

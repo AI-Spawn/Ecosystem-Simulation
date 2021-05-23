@@ -175,24 +175,24 @@ class Ant {
         return spawn;
     }
     show() {
-        strokeWeight(2);
+        pg.strokeWeight(2);
         if (!this.dead) {
-            stroke(0);
-            colorMode(HSL);
-            fill(this.color);
-            colorMode(RGB);
-            ellipse(this.x, this.y, this.size, this.size);
-            fill(0);
-            text(int(this.food), this.x, this.y);
+            pg.stroke(0);
+            pg.colorMode(HSL);
+            pg.fill(this.color);
+            pg.colorMode(RGB);
+            pg.ellipse(this.x, this.y, this.size, this.size);
+            pg.fill(0);
+            pg.text(int(this.food), this.x, this.y);
         }
         if (show_vision) {
-            fill(255, 255, 255, 20);
-            ellipse(this.x, this.y, this.vision_range, this.vision_range);
-            ellipse(this.x, this.y, this.shout_range, this.shout_range);
+            pg.fill(255, 255, 255, 20);
+            pg.ellipse(this.x, this.y, this.vision_range, this.vision_range);
+            pg.ellipse(this.x, this.y, this.shout_range, this.shout_range);
         }
         if (show_vel) {
-            stroke(255, 0, 0);
-            line(this.x, this.y, this.x + cos(this.angle) * 100, this.y + sin(this.angle) * 100);
+            pg.stroke(255, 0, 0);
+            pg.line(this.x, this.y, this.x + cos(this.angle) * 100, this.y + sin(this.angle) * 100);
         }
     }
     eat(food) {
@@ -204,7 +204,7 @@ class Ant {
     }
     drawClosest(points) {
         for (const a of points) {
-            line(this.x, this.y, a.x, a.y);
+            pg.line(this.x, this.y, a.x, a.y);
         }
     }
 }
@@ -233,6 +233,7 @@ function dc(obj) {
     return JSON.parse(JSON.stringify(obj));
 }
 let cnv;
+let pg;
 let moveUpdate = Date.now();
 let depos = [];
 let ants = [];
@@ -241,6 +242,7 @@ let tick = 0;
 function setup() {
     cnv = createCanvas(windowWidth, windowHeight);
     cnv.position(0, 0);
+    pg = createGraphics(1920, 975);
     for (let i = 0; i < num_food; i++) {
         depos.push(new Food());
     }
@@ -249,17 +251,21 @@ function setup() {
         ants.push(a);
         ant_tree.push(a);
     }
-    textAlign(CENTER, CENTER);
-    ellipseMode(RADIUS);
+    pg.textAlign(CENTER, CENTER);
+    pg.ellipseMode(RADIUS);
 }
 function draw() {
     tick++;
-    scale(min(windowWidth / 1920, windowHeight / 975));
-    background(128, 175, 73);
+    pg.fill(128, 175, 73);
+    pg.rect(0, 0, 1920, 975);
     gen_grid_lines();
     show_food();
     doAnts();
     depos.filter((depo) => depo.capacity > 0);
+    let scale = min(windowWidth / 1920, windowHeight / 975);
+    image(pg, 0, 0, 1920 * scale, 975 * scale);
+    width = 1920;
+    height = 975;
 }
 function getColor() {
     const randomInt = (min, max) => {
@@ -305,10 +311,10 @@ class Food {
         this.capacity = c;
     }
     show() {
-        fill(40, 64, 14);
-        ellipse(this.x, this.y, this.capacity * 2, this.capacity * 2);
-        fill(62, 93, 33);
-        ellipse(this.x, this.y, (this.capacity * 2 * 7) / 10, (this.capacity * 2 * 7) / 10);
+        pg.fill(40, 64, 14);
+        pg.ellipse(this.x, this.y, this.capacity * 2, this.capacity * 2);
+        pg.fill(62, 93, 33);
+        pg.ellipse(this.x, this.y, (this.capacity * 2 * 7) / 10, (this.capacity * 2 * 7) / 10);
     }
     consume(amount) {
         if (amount > 0) {
@@ -320,7 +326,7 @@ class Food {
     }
 }
 function show_food() {
-    strokeWeight(0);
+    pg.strokeWeight(0);
     for (let i = 0; i < depos.length; i++) {
         let f = depos[i];
         f.show();
@@ -331,13 +337,13 @@ function show_food() {
 }
 function gen_grid_lines() {
     let grid_spacing = width / 10;
-    stroke(0);
-    strokeWeight(2);
+    pg.stroke(0);
+    pg.strokeWeight(2);
     for (let i = 0; i < width / grid_spacing; i++) {
-        line(i * grid_spacing, 0, i * grid_spacing, height);
+        pg.line(i * grid_spacing, 0, i * grid_spacing, height);
     }
     for (let i = 0; i < height / grid_spacing; i++) {
-        line(0, i * grid_spacing, width, i * grid_spacing);
+        pg.line(0, i * grid_spacing, width, i * grid_spacing);
     }
 }
 class Point {
