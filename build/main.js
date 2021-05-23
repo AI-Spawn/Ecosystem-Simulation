@@ -15,10 +15,11 @@ class Ant {
         this.max_food = birth_food;
         this.shout_range = shout_range;
         this.angle = random(0, PI * 2);
-        this.dead = false;
         this.last_move = Date.now();
         this.thoughts = [];
         this.spawn_time = 0;
+        this.death_time = Number.MAX_SAFE_INTEGER;
+        this.dead = false;
         this.children = [];
         this.x = x;
         this.y = y;
@@ -62,6 +63,7 @@ class Ant {
             this.food -= this.move_energy;
             if (this.food < 0) {
                 this.dead = true;
+                this.death_time = tick;
             }
         }
         this.show();
@@ -237,7 +239,7 @@ let ants = [];
 let ant_tree = [];
 let tick = 0;
 function setup() {
-    cnv = createCanvas(size, size * (windowHeight / windowWidth));
+    cnv = createCanvas(windowWidth, windowHeight);
     cnv.position(0, 0);
     for (let i = 0; i < num_food; i++) {
         depos.push(new Food());
@@ -252,7 +254,7 @@ function setup() {
 }
 function draw() {
     tick++;
-    scale(windowWidth / size);
+    scale(min(windowWidth / 1920, windowHeight / 975));
     background(128, 175, 73);
     gen_grid_lines();
     show_food();
@@ -272,6 +274,9 @@ function keyPressed() {
     if (key == "s") {
         save(ant_tree, "tree.json");
     }
+}
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
 }
 let size = 2000;
 let show_vel = true;

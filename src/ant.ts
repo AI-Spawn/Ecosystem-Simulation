@@ -24,10 +24,13 @@ class Ant {
 
   angle = random(0, PI * 2);
 
-  dead = false;
   last_move = Date.now();
   thoughts: Thought[] = [];
+
   spawn_time = 0;
+  death_time = Number.MAX_SAFE_INTEGER;
+  dead = false;
+
   children: Ant[] = [];
   constructor(x = random(0, width), y = random(0, height)) {
     this.x = x;
@@ -75,6 +78,7 @@ class Ant {
       this.food -= this.move_energy;
       if (this.food < 0) {
         this.dead = true;
+        this.death_time = tick;
       }
     }
     this.show();

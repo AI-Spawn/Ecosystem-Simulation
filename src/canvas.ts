@@ -9,7 +9,7 @@ let ant_tree: Ant[] = [];
 let tick = 0;
 
 function setup() {
-  cnv = createCanvas(size, size * (windowHeight / windowWidth));
+  cnv = createCanvas(windowWidth, windowHeight);
   cnv.position(0, 0);
 
   for (let i = 0; i < num_food; i++) {
@@ -25,7 +25,7 @@ function setup() {
 }
 function draw() {
   tick++;
-  scale(windowWidth / size);
+  scale(min(windowWidth / 1920, windowHeight / 975));
 
   background(128, 175, 73);
 
@@ -50,4 +50,8 @@ function keyPressed() {
   if (key == "s") {
     save(ant_tree, "tree.json");
   }
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
 }
