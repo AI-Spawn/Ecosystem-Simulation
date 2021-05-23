@@ -1,7 +1,7 @@
 ///////////////
 // sim setup //
 ///////////////
-let size = 2000;
+let size = 4000;
 let show_vel = true;
 let show_vision = false;
 
@@ -10,7 +10,7 @@ let record_every = 500;
 //////////
 // ants //
 //////////
-let num_ants = 5;
+let num_ants = 50;
 
 let turn_speed = (0.5 * Math.PI) / 180;
 
@@ -32,7 +32,7 @@ let vision_max = 2;
 //////////
 // food //
 //////////
-let num_food = 5;
+let num_food = 20;
 
 let min_food_size = 25;
 let max_food_size = 75;
@@ -45,7 +45,7 @@ let exist_time = 100;
 ///////////////
 // evolution //
 ///////////////
-let max_skill_points = 20;
+let max_skill_points = 100;
 let color_change_rate = 5;
 
 let pos_mutation_chance = 0.5;

@@ -274,9 +274,11 @@ let ant_tree = [];
 let stats = [];
 let tick = 0;
 function setup() {
+    width = size;
+    height = size * (975 / 1920);
     cnv = createCanvas(windowWidth, windowHeight);
     cnv.position(0, 0);
-    pg = createGraphics(1920, 975);
+    pg = createGraphics(size, size * (975 / 1920));
     for (let i = 0; i < num_food; i++) {
         depos.push(new Food());
     }
@@ -291,15 +293,15 @@ function setup() {
 function draw() {
     tick++;
     pg.fill(128, 175, 73);
-    pg.rect(0, 0, 1920, 975);
+    pg.rect(0, 0, width, height);
     gen_grid_lines();
     show_food();
     doAnts();
     depos.filter((depo) => depo.capacity > 0);
     let scale = min(windowWidth / 1920, windowHeight / 975);
     image(pg, 0, 0, 1920 * scale, 975 * scale);
-    width = 1920;
-    height = 975;
+    width = size;
+    height = size * (975 / 1920);
     if (tick % record_every == 0) {
         stats.push(getStats(ants));
     }
@@ -323,11 +325,14 @@ function keyPressed() {
 }
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
+    width = size;
+    height = size * (975 / 1920);
 }
 function getStats(ants) {
     let pop = ants.length;
     let stats = {
         population_size: pop,
+        num_points: ants.reduce((a, b) => a + b.skill_tree.total, 0) / pop,
         speed: ants.reduce((a, b) => a + b.speed, 0) / pop,
         energy_rate: ants.reduce((a, b) => a + b.energy_rate, 0) / pop,
         vision_range: ants.reduce((a, b) => a + b.vision_range, 0) / pop,
@@ -335,11 +340,11 @@ function getStats(ants) {
     };
     return stats;
 }
-let size = 2000;
+let size = 4000;
 let show_vel = true;
 let show_vision = false;
 let record_every = 500;
-let num_ants = 5;
+let num_ants = 50;
 let turn_speed = (0.5 * Math.PI) / 180;
 let start_food = 500;
 let birth_food = 1200;
@@ -353,11 +358,11 @@ let ant_speed = 100;
 let vision_range = 100;
 let shout_range = 300;
 let vision_max = 2;
-let num_food = 5;
+let num_food = 20;
 let min_food_size = 25;
 let max_food_size = 75;
 let exist_time = 100;
-let max_skill_points = 20;
+let max_skill_points = 100;
 let color_change_rate = 5;
 let pos_mutation_chance = 0.5;
 let sec_pos_mutation_chance = 0.2;

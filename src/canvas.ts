@@ -13,9 +13,11 @@ let stats: Stats[] = [];
 let tick = 0;
 
 function setup() {
+  width = size;
+  height = size * (975 / 1920);
   cnv = createCanvas(windowWidth, windowHeight);
   cnv.position(0, 0);
-  pg = createGraphics(1920, 975);
+  pg = createGraphics(size, size * (975 / 1920));
 
   for (let i = 0; i < num_food; i++) {
     depos.push(new Food());
@@ -32,7 +34,7 @@ function draw() {
   tick++;
 
   pg.fill(128, 175, 73);
-  pg.rect(0, 0, 1920, 975);
+  pg.rect(0, 0, width, height);
 
   gen_grid_lines();
   show_food();
@@ -41,8 +43,8 @@ function draw() {
 
   let scale = min(windowWidth / 1920, windowHeight / 975);
   image(pg, 0, 0, 1920 * scale, 975 * scale);
-  width = 1920;
-  height = 975;
+  width = size;
+  height = size * (975 / 1920);
 
   if (tick % record_every == 0) {
     stats.push(getStats(ants));
@@ -72,12 +74,16 @@ function keyPressed() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+  width = size;
+  height = size * (975 / 1920);
 }
 
 function getStats(ants: Ant[]) {
   let pop = ants.length;
   let stats: Stats = {
     population_size: pop,
+    num_points: ants.reduce((a, b) => a + b.skill_tree.total, 0) / pop,
+
     speed: ants.reduce((a, b) => a + b.speed, 0) / pop,
     energy_rate: ants.reduce((a, b) => a + b.energy_rate, 0) / pop,
     vision_range: ants.reduce((a, b) => a + b.vision_range, 0) / pop,
@@ -89,6 +95,8 @@ function getStats(ants: Ant[]) {
 
 interface Stats {
   population_size: number;
+  num_points: number;
+
   speed: number;
   energy_rate: number;
   vision_range: number;
