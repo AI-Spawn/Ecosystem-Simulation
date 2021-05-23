@@ -51,6 +51,9 @@ let color_change_rate = 5;
 let pos_mutation_chance = 0.5;
 let sec_pos_mutation_chance = 0.2;
 
+let neg_mutation_chance = 0.5;
+let sec_neg_mutation_chance = 0.2;
+
 let speed_effect = 2;
 let move_energy_effect = 0.1;
 let energy_rate_effect = 0.1;
