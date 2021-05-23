@@ -6,15 +6,16 @@ class Ant {
   learning_rate = 1.1;
 
   color = getColor();
-  color_change_rate = 1;
 
   size = 25;
   food = start_food;
 
   speed = ant_speed;
 
-  move_energy = move_energy;
+  litter_size = litter_size;
 
+  move_energy = move_energy;
+  energy_rate = energy_rate;
   vision_range = vision_range;
 
   max_food = birth_food;
@@ -74,12 +75,20 @@ class Ant {
 
     this.forget();
     //if in range eat depo
-    if (dist < 0) {
+    if (dist < this.size) {
       depo.capacity -= eat_rate;
-      this.food += energy_rate;
+      this.food += this.energy_rate;
       if (this.food >= this.max_food) {
         this.food -= birth_energy;
-        for (let i = 0; i < random(litter_min, litter_max); i++) {
+        for (
+          let i = 0;
+          i <
+          random(
+            this.litter_size - litter_varience,
+            this.litter_size + litter_varience
+          );
+          i++
+        ) {
           let spawn = this.mitosis();
           ants.push(spawn);
           this.children.push(spawn);
@@ -206,11 +215,6 @@ class Ant {
     spawn.x = this.x;
     spawn.y = this.y;
 
-    spawn.color = this.color;
-    for (let c = 0; c < spawn.color.length; c++) {
-      spawn.color[c] += random(-this.color_change_rate, this.color_change_rate);
-    }
-
     spawn.skill_tree.total = this.skill_tree.total;
     spawn.skill_tree.stats = new Map(this.skill_tree.stats);
     let st = spawn.skill_tree.stats;
@@ -246,18 +250,33 @@ class Ant {
     //@ts-ignore
     spawn.speed += speed_effect * st.get("speed");
 
-    spawn.move_energy -= min(
+    spawn.move_energy -= max(
       //@ts-ignore
       move_energy_effect * st.get("move_energy"),
-      this.move_energy
+      this.move_energy - 1
     );
 
     //@ts-ignore
-    spawn.move_energy += move_energy_effect * st.get("move_energy");
+    spawn.energy_rate += energy_rate_effect * st.get("energy_rate");
 
     spawn.turn_speed +=
       //@ts-ignore
-      (move_energy_effect * st.get("move_energy") * Math.PI) / 180;
+      (turn_speed_effect * st.get("turn_angle") * Math.PI) / 180;
+
+    spawn.vision_range +=
+      //@ts-ignore
+      st.get("vision_range") * vision_range_effect;
+
+    spawn.litter_size +=
+      //@ts-ignore
+      st.get("litter_size") * litter_size_effect;
+
+    //color
+    spawn.color = JSON.parse(JSON.stringify(this.color));
+    spawn.color[0] +=
+      random(-color_change_rate, color_change_rate) * pos_mutations;
+
+    spawn.color[0] = clamp(spawn.color[0], 0, 360);
 
     return spawn;
   }
