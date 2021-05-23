@@ -19,6 +19,7 @@ class Ant {
         this.last_move = Date.now();
         this.thoughts = [];
         this.spawn_time = 0;
+        this.children = [];
         this.x = x;
         this.y = y;
     }
@@ -52,6 +53,7 @@ class Ant {
                 for (let i = 0; i < random(litter_min, litter_max); i++) {
                     let spawn = this.mitosis();
                     ants.push(spawn);
+                    this.children.push(spawn);
                 }
             }
         }
@@ -232,6 +234,7 @@ let cnv;
 let moveUpdate = Date.now();
 let depos = [];
 let ants = [];
+let ant_tree = [];
 let tick = 0;
 function setup() {
     cnv = createCanvas(size, size * (windowHeight / windowWidth));
@@ -242,6 +245,7 @@ function setup() {
     for (let i = 0; i < num_ants; i++) {
         let a = new Ant();
         ants.push(a);
+        ant_tree.push(a);
     }
     textAlign(CENTER, CENTER);
     ellipseMode(RADIUS);
@@ -263,6 +267,11 @@ function getColor() {
     var s = randomInt(42, 98);
     var l = randomInt(40, 90);
     return [h, s, l];
+}
+function keyPressed() {
+    if (key == "s") {
+        save(ant_tree, "tree.json");
+    }
 }
 let size = 2000;
 let show_vel = true;

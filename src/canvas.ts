@@ -4,6 +4,7 @@ let moveUpdate = Date.now();
 let depos: Food[] = [];
 
 let ants: Ant[] = [];
+let ant_tree: Ant[] = [];
 
 let tick = 0;
 
@@ -17,6 +18,7 @@ function setup() {
   for (let i = 0; i < num_ants; i++) {
     let a = new Ant();
     ants.push(a);
+    ant_tree.push(a);
   }
   textAlign(CENTER, CENTER);
   ellipseMode(RADIUS);
@@ -42,4 +44,10 @@ function getColor() {
   var s = randomInt(42, 98);
   var l = randomInt(40, 90);
   return [h, s, l];
+}
+
+function keyPressed() {
+  if (key == "s") {
+    save(ant_tree, "tree.json");
+  }
 }

@@ -28,6 +28,7 @@ class Ant {
   last_move = Date.now();
   thoughts: Thought[] = [];
   spawn_time = 0;
+  children: Ant[] = [];
   constructor(x = random(0, width), y = random(0, height)) {
     this.x = x;
     this.y = y;
@@ -66,6 +67,7 @@ class Ant {
         for (let i = 0; i < random(litter_min, litter_max); i++) {
           let spawn = this.mitosis();
           ants.push(spawn);
+          this.children.push(spawn);
         }
       }
     } else {
