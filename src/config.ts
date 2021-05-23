@@ -10,7 +10,7 @@ let show_vision = false;
 //////////
 let num_ants = 5;
 
-let turn_speed = (10 * Math.PI) / 180;
+let turn_speed = (5 * Math.PI) / 180;
 
 let start_food = 1000;
 let birth_food = 1200;
@@ -43,8 +43,11 @@ let exist_time = 100;
 ///////////////
 // evolution //
 ///////////////
+let max_skill_points = 20;
+
 let pos_mutation_chance = 0.5;
 let sec_pos_mutation_chance = 0.2;
 
-let max_skill_points = 100;
 let speed_effect = 2;
+let move_energy_effect = 3;
+let turn_speed_effect = 2;

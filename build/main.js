@@ -11,6 +11,7 @@ class Ant {
         this.vision_range = vision_range;
         this.max_food = birth_food;
         this.shout_range = shout_range;
+        this.turn_speed = turn_speed;
         this.angle = random(0, PI * 2);
         this.last_move = Date.now();
         this.thoughts = [];
@@ -22,13 +23,15 @@ class Ant {
         this.y = y;
         this.skill_tree = {
             total: 0,
-            speed: 0,
-            move_energy: 0,
-            litter_size: 0,
-            vision_range: 0,
-            eat_rate: 0,
-            energy_rate: 0,
+            stats: new Map(),
         };
+        let s = this.skill_tree.stats;
+        s.set("speed", 0);
+        s.set("move_energy", 0);
+        s.set("energy_rate", 0);
+        s.set("litter_size", 0);
+        s.set("vision_range", 0);
+        s.set("turn_angle", 0);
     }
     think() {
         let [depo, dist] = this.get_closest_food(depos);
@@ -157,8 +160,8 @@ class Ant {
             diff += 2 * PI;
         if (diff > PI)
             dir = -1;
-        if (diff > turn_speed) {
-            this.angle += turn_speed * dir;
+        if (diff > this.turn_speed) {
+            this.angle += this.turn_speed * dir;
         }
         else {
             this.angle = target_angle;
@@ -172,7 +175,9 @@ class Ant {
         for (let c = 0; c < spawn.color.length; c++) {
             spawn.color[c] += random(-this.color_change_rate, this.color_change_rate);
         }
-        spawn.skill_tree = this.skill_tree;
+        spawn.skill_tree.total = this.skill_tree.total;
+        spawn.skill_tree.stats = new Map(this.skill_tree.stats);
+        let st = spawn.skill_tree.stats;
         let pos_mutations = 0;
         if (random() > pos_mutation_chance &&
             spawn.skill_tree.total < max_skill_points) {
@@ -184,6 +189,16 @@ class Ant {
                 spawn.skill_tree.total++;
             }
         }
+        let branches = Array.from(st, ([name, value]) => name);
+        for (let m = 0; m < pos_mutations; m++) {
+            let choice = branches[Math.floor(random() * branches.length)];
+            st.set(choice, st.get(choice) + 1);
+        }
+        spawn.speed += speed_effect * st.get("speed");
+        spawn.move_energy -= min(move_energy_effect * st.get("move_energy"), this.move_energy);
+        spawn.move_energy += move_energy_effect * st.get("move_energy");
+        spawn.turn_speed +=
+            (move_energy_effect * st.get("move_energy") * Math.PI) / 180;
         return spawn;
     }
     show() {
@@ -300,7 +315,7 @@ let size = 2000;
 let show_vel = true;
 let show_vision = false;
 let num_ants = 5;
-let turn_speed = (10 * Math.PI) / 180;
+let turn_speed = (5 * Math.PI) / 180;
 let start_food = 1000;
 let birth_food = 1200;
 let birth_energy = 400;
@@ -317,10 +332,12 @@ let num_food = 5;
 let min_food_size = 25;
 let max_food_size = 75;
 let exist_time = 100;
+let max_skill_points = 20;
 let pos_mutation_chance = 0.5;
 let sec_pos_mutation_chance = 0.2;
-let max_skill_points = 100;
 let speed_effect = 2;
+let move_energy_effect = 3;
+let turn_speed_effect = 2;
 class Food {
     constructor(x = random(0, width), y = random(0, height), c = random(min_food_size, max_food_size)) {
         this.x = x;

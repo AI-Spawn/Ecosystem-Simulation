@@ -20,6 +20,8 @@ class Ant {
   max_food = birth_food;
   shout_range = shout_range;
 
+  turn_speed = turn_speed;
+
   angle = random(0, PI * 2);
 
   last_move = Date.now();
@@ -36,13 +38,15 @@ class Ant {
 
     this.skill_tree = {
       total: 0,
-      speed: 0,
-      move_energy: 0,
-      litter_size: 0,
-      vision_range: 0,
-      eat_rate: 0,
-      energy_rate: 0,
+      stats: new Map(),
     };
+    let s = this.skill_tree.stats;
+    s.set("speed", 0);
+    s.set("move_energy", 0);
+    s.set("energy_rate", 0);
+    s.set("litter_size", 0);
+    s.set("vision_range", 0);
+    s.set("turn_angle", 0);
   }
 
   think() {
@@ -189,8 +193,8 @@ class Ant {
     if (diff < 0) diff += 2 * PI;
     if (diff > PI) dir = -1; // left turn
 
-    if (diff > turn_speed) {
-      this.angle += turn_speed * dir;
+    if (diff > this.turn_speed) {
+      this.angle += this.turn_speed * dir;
     } else {
       this.angle = target_angle;
     }
@@ -207,7 +211,9 @@ class Ant {
       spawn.color[c] += random(-this.color_change_rate, this.color_change_rate);
     }
 
-    spawn.skill_tree = this.skill_tree;
+    spawn.skill_tree.total = this.skill_tree.total;
+    spawn.skill_tree.stats = new Map(this.skill_tree.stats);
+    let st = spawn.skill_tree.stats;
 
     let pos_mutations = 0;
     if (
@@ -225,6 +231,33 @@ class Ant {
         spawn.skill_tree.total++;
       }
     }
+
+    //increment skill tree
+    let branches = Array.from(st, ([name, value]) => name);
+    for (let m = 0; m < pos_mutations; m++) {
+      let choice = branches[Math.floor(random() * branches.length)];
+      st.set(
+        choice,
+        //@ts-ignore
+        st.get(choice) + 1
+      );
+    }
+
+    //@ts-ignore
+    spawn.speed += speed_effect * st.get("speed");
+
+    spawn.move_energy -= min(
+      //@ts-ignore
+      move_energy_effect * st.get("move_energy"),
+      this.move_energy
+    );
+
+    //@ts-ignore
+    spawn.move_energy += move_energy_effect * st.get("move_energy");
+
+    spawn.turn_speed +=
+      //@ts-ignore
+      (move_energy_effect * st.get("move_energy") * Math.PI) / 180;
 
     return spawn;
   }
@@ -270,16 +303,10 @@ class Ant {
     }
   }
 }
+
 interface Skill_Tree {
   total: number;
-
-  speed: number;
-  move_energy: number;
-  litter_size: number;
-  vision_range: number;
-
-  eat_rate: number;
-  energy_rate: number;
+  stats: Map<string, number>;
 }
 function doAnts() {
   for (let a of ants) {
