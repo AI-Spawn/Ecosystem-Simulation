@@ -2,26 +2,57 @@ class Ant {
   x: number;
   y: number;
 
+  skill_tree: Skill_Tree;
+  learning_rate = 1.1;
+
+  color = getColor();
+
   size = 25;
   food = start_food;
 
   speed = ant_speed;
 
+  litter_size = litter_size;
+
+  move_energy = move_energy;
+  energy_rate = energy_rate;
+  vision_range = vision_range;
+
   max_food = birth_food;
+  shout_range = shout_range;
+
+  turn_speed = turn_speed;
 
   angle = random(0, PI * 2);
 
-  dead = false;
   last_move = Date.now();
   thoughts: Thought[] = [];
+
+  spawn_time = 0;
+  death_time = Number.MAX_SAFE_INTEGER;
+  dead = false;
+
+  children: Ant[] = [];
   constructor(x = random(0, width), y = random(0, height)) {
     this.x = x;
     this.y = y;
+
+    this.skill_tree = {
+      total: 0,
+      stats: new Map(),
+    };
+    let s = this.skill_tree.stats;
+    s.set("speed", 0);
+    s.set("move_energy", 0);
+    s.set("energy_rate", 0);
+    s.set("litter_size", 0);
+    s.set("vision_range", 0);
+    s.set("turn_angle", 0);
   }
 
   think() {
     let [depo, dist] = this.get_closest_food(depos);
-    if (dist < vision_range) {
+    if (dist < this.vision_range) {
       let thought: Thought = {
         x: depo.x,
         y: depo.y,
@@ -44,23 +75,31 @@ class Ant {
 
     this.forget();
     //if in range eat depo
-    if (dist < 0) {
+    if (dist < this.size) {
       depo.capacity -= eat_rate;
-      this.food += energy_rate;
+      this.food += this.energy_rate;
       if (this.food >= this.max_food) {
         this.food -= birth_energy;
-        for (let i = 0; i < random(litter_min, litter_max); i++) {
-          let spawn = new Ant();
-          spawn.x = this.x;
-          spawn.y = this.y;
+        for (
+          let i = 0;
+          i <
+          random(
+            this.litter_size - litter_varience,
+            this.litter_size + litter_varience
+          );
+          i++
+        ) {
+          let spawn = this.mitosis();
           ants.push(spawn);
+          this.children.push(spawn);
         }
       }
     } else {
       this.move();
-      this.food -= move_energy;
+      this.food -= this.move_energy;
       if (this.food < 0) {
         this.dead = true;
+        this.death_time = tick;
       }
     }
     this.show();
@@ -90,9 +129,13 @@ class Ant {
       let point = new Point(a.x, a.y, a);
       qtree.insert(point);
     }
-    let range = new Circle(this.x, this.y, shout_range);
+    let range = new Circle(this.x, this.y, this.shout_range);
     let closest = qtree.query(range);
-    return closest;
+    closest = closest.sort((a, b) =>
+      dist(this.x, this.y, a.x, a.y) < dist(this.x, this.y, b.x, b.y) ? 1 : 0
+    );
+
+    return closest.slice(0, min(closest.length, vision_max));
   }
 
   get_closest_food(items: Food[]): [Food, number] {
@@ -110,6 +153,7 @@ class Ant {
 
     return [ans, ld];
   }
+
   move() {
     let time_scale = Date.now() - this.last_move;
     time_scale = 10;
@@ -158,31 +202,104 @@ class Ant {
     if (diff < 0) diff += 2 * PI;
     if (diff > PI) dir = -1; // left turn
 
-    if (diff > turn_speed) {
-      this.angle += turn_speed * dir;
+    if (diff > this.turn_speed) {
+      this.angle += this.turn_speed * dir;
     } else {
       this.angle = target_angle;
     }
   }
 
-  show() {
-    strokeWeight(2);
-    if (!this.dead) {
-      stroke(0);
-      fill(47, 185, 161);
+  mitosis() {
+    let spawn = new Ant();
 
-      ellipse(this.x, this.y, this.size, this.size);
-      fill(0);
-      text(int(this.food), this.x, this.y);
+    spawn.x = this.x;
+    spawn.y = this.y;
+
+    spawn.skill_tree.total = this.skill_tree.total;
+    spawn.skill_tree.stats = new Map(this.skill_tree.stats);
+    let st = spawn.skill_tree.stats;
+
+    let pos_mutations = 0;
+    if (
+      random() > pos_mutation_chance &&
+      spawn.skill_tree.total < max_skill_points
+    ) {
+      pos_mutations++;
+      spawn.skill_tree.total++;
+
+      while (
+        random() > sec_pos_mutation_chance &&
+        spawn.skill_tree.total < max_skill_points
+      ) {
+        pos_mutations++;
+        spawn.skill_tree.total++;
+      }
+    }
+
+    //increment skill tree
+    let branches = Array.from(st, ([name, value]) => name);
+    for (let m = 0; m < pos_mutations; m++) {
+      let choice = branches[Math.floor(random() * branches.length)];
+      st.set(
+        choice,
+        //@ts-ignore
+        st.get(choice) + 1
+      );
+    }
+
+    //@ts-ignore
+    spawn.speed += speed_effect * st.get("speed");
+
+    spawn.move_energy -= max(
+      //@ts-ignore
+      move_energy_effect * st.get("move_energy"),
+      this.move_energy - 1
+    );
+
+    //@ts-ignore
+    spawn.energy_rate += energy_rate_effect * st.get("energy_rate");
+
+    spawn.turn_speed +=
+      //@ts-ignore
+      (turn_speed_effect * st.get("turn_angle") * Math.PI) / 180;
+
+    spawn.vision_range +=
+      //@ts-ignore
+      st.get("vision_range") * vision_range_effect;
+
+    spawn.litter_size +=
+      //@ts-ignore
+      st.get("litter_size") * litter_size_effect;
+
+    //color
+    spawn.color = JSON.parse(JSON.stringify(this.color));
+    spawn.color[0] +=
+      random(-color_change_rate, color_change_rate) * pos_mutations;
+
+    spawn.color[0] = clamp(spawn.color[0], 0, 360);
+
+    return spawn;
+  }
+
+  show() {
+    pg.strokeWeight(2);
+    if (!this.dead) {
+      pg.stroke(0);
+      pg.colorMode(HSL);
+      pg.fill(this.color);
+      pg.colorMode(RGB);
+      pg.ellipse(this.x, this.y, this.size, this.size);
+      pg.fill(0);
+      pg.text(int(this.food), this.x, this.y);
     }
     if (show_vision) {
-      fill(255, 255, 255, 20);
-      ellipse(this.x, this.y, vision_range, vision_range);
-      ellipse(this.x, this.y, shout_range, shout_range);
+      pg.fill(255, 255, 255, 20);
+      pg.ellipse(this.x, this.y, this.vision_range, this.vision_range);
+      pg.ellipse(this.x, this.y, this.shout_range, this.shout_range);
     }
     if (show_vel) {
-      stroke(255, 0, 0);
-      line(
+      pg.stroke(255, 0, 0);
+      pg.line(
         this.x,
         this.y,
         this.x + cos(this.angle) * 100,
@@ -201,11 +318,15 @@ class Ant {
 
   drawClosest(points: Point[]) {
     for (const a of points) {
-      line(this.x, this.y, a.x, a.y);
+      pg.line(this.x, this.y, a.x, a.y);
     }
   }
 }
 
+interface Skill_Tree {
+  total: number;
+  stats: Map<string, number>;
+}
 function doAnts() {
   for (let a of ants) {
     a.think();

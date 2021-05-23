@@ -13,10 +13,10 @@ class Food {
   }
 
   show() {
-    fill(40, 64, 14);
-    ellipse(this.x, this.y, this.capacity * 2, this.capacity * 2);
-    fill(62, 93, 33);
-    ellipse(
+    pg.fill(40, 64, 14);
+    pg.ellipse(this.x, this.y, this.capacity * 2, this.capacity * 2);
+    pg.fill(62, 93, 33);
+    pg.ellipse(
       this.x,
       this.y,
       (this.capacity * 2 * 7) / 10,
@@ -35,7 +35,7 @@ class Food {
 }
 
 function show_food() {
-  strokeWeight(0);
+  pg.strokeWeight(0);
   for (let i = 0; i < depos.length; i++) {
     let f = depos[i];
     f.show();

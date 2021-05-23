@@ -1,20 +1,42 @@
 "use strict";
 class Ant {
     constructor(x = random(0, width), y = random(0, height)) {
+        this.learning_rate = 1.1;
+        this.color = getColor();
         this.size = 25;
         this.food = start_food;
         this.speed = ant_speed;
+        this.litter_size = litter_size;
+        this.move_energy = move_energy;
+        this.energy_rate = energy_rate;
+        this.vision_range = vision_range;
         this.max_food = birth_food;
+        this.shout_range = shout_range;
+        this.turn_speed = turn_speed;
         this.angle = random(0, PI * 2);
-        this.dead = false;
         this.last_move = Date.now();
         this.thoughts = [];
+        this.spawn_time = 0;
+        this.death_time = Number.MAX_SAFE_INTEGER;
+        this.dead = false;
+        this.children = [];
         this.x = x;
         this.y = y;
+        this.skill_tree = {
+            total: 0,
+            stats: new Map(),
+        };
+        let s = this.skill_tree.stats;
+        s.set("speed", 0);
+        s.set("move_energy", 0);
+        s.set("energy_rate", 0);
+        s.set("litter_size", 0);
+        s.set("vision_range", 0);
+        s.set("turn_angle", 0);
     }
     think() {
         let [depo, dist] = this.get_closest_food(depos);
-        if (dist < vision_range) {
+        if (dist < this.vision_range) {
             let thought = {
                 x: depo.x,
                 y: depo.y,
@@ -34,24 +56,25 @@ class Ant {
         }
         this.communicate();
         this.forget();
-        if (dist < 0) {
+        if (dist < this.size) {
             depo.capacity -= eat_rate;
-            this.food += energy_rate;
+            this.food += this.energy_rate;
             if (this.food >= this.max_food) {
                 this.food -= birth_energy;
-                for (let i = 0; i < random(litter_min, litter_max); i++) {
-                    let spawn = new Ant();
-                    spawn.x = this.x;
-                    spawn.y = this.y;
+                for (let i = 0; i <
+                    random(this.litter_size - litter_varience, this.litter_size + litter_varience); i++) {
+                    let spawn = this.mitosis();
                     ants.push(spawn);
+                    this.children.push(spawn);
                 }
             }
         }
         else {
             this.move();
-            this.food -= move_energy;
+            this.food -= this.move_energy;
             if (this.food < 0) {
                 this.dead = true;
+                this.death_time = tick;
             }
         }
         this.show();
@@ -80,9 +103,10 @@ class Ant {
             let point = new Point(a.x, a.y, a);
             qtree.insert(point);
         }
-        let range = new Circle(this.x, this.y, shout_range);
+        let range = new Circle(this.x, this.y, this.shout_range);
         let closest = qtree.query(range);
-        return closest;
+        closest = closest.sort((a, b) => dist(this.x, this.y, a.x, a.y) < dist(this.x, this.y, b.x, b.y) ? 1 : 0);
+        return closest.slice(0, min(closest.length, vision_max));
     }
     get_closest_food(items) {
         let ans = items[0];
@@ -138,30 +162,70 @@ class Ant {
             diff += 2 * PI;
         if (diff > PI)
             dir = -1;
-        if (diff > turn_speed) {
-            this.angle += turn_speed * dir;
+        if (diff > this.turn_speed) {
+            this.angle += this.turn_speed * dir;
         }
         else {
             this.angle = target_angle;
         }
     }
+    mitosis() {
+        let spawn = new Ant();
+        spawn.x = this.x;
+        spawn.y = this.y;
+        spawn.skill_tree.total = this.skill_tree.total;
+        spawn.skill_tree.stats = new Map(this.skill_tree.stats);
+        let st = spawn.skill_tree.stats;
+        let pos_mutations = 0;
+        if (random() > pos_mutation_chance &&
+            spawn.skill_tree.total < max_skill_points) {
+            pos_mutations++;
+            spawn.skill_tree.total++;
+            while (random() > sec_pos_mutation_chance &&
+                spawn.skill_tree.total < max_skill_points) {
+                pos_mutations++;
+                spawn.skill_tree.total++;
+            }
+        }
+        let branches = Array.from(st, ([name, value]) => name);
+        for (let m = 0; m < pos_mutations; m++) {
+            let choice = branches[Math.floor(random() * branches.length)];
+            st.set(choice, st.get(choice) + 1);
+        }
+        spawn.speed += speed_effect * st.get("speed");
+        spawn.move_energy -= max(move_energy_effect * st.get("move_energy"), this.move_energy - 1);
+        spawn.energy_rate += energy_rate_effect * st.get("energy_rate");
+        spawn.turn_speed +=
+            (turn_speed_effect * st.get("turn_angle") * Math.PI) / 180;
+        spawn.vision_range +=
+            st.get("vision_range") * vision_range_effect;
+        spawn.litter_size +=
+            st.get("litter_size") * litter_size_effect;
+        spawn.color = JSON.parse(JSON.stringify(this.color));
+        spawn.color[0] +=
+            random(-color_change_rate, color_change_rate) * pos_mutations;
+        spawn.color[0] = clamp(spawn.color[0], 0, 360);
+        return spawn;
+    }
     show() {
-        strokeWeight(2);
+        pg.strokeWeight(2);
         if (!this.dead) {
-            stroke(0);
-            fill(47, 185, 161);
-            ellipse(this.x, this.y, this.size, this.size);
-            fill(0);
-            text(int(this.food), this.x, this.y);
+            pg.stroke(0);
+            pg.colorMode(HSL);
+            pg.fill(this.color);
+            pg.colorMode(RGB);
+            pg.ellipse(this.x, this.y, this.size, this.size);
+            pg.fill(0);
+            pg.text(int(this.food), this.x, this.y);
         }
         if (show_vision) {
-            fill(255, 255, 255, 20);
-            ellipse(this.x, this.y, vision_range, vision_range);
-            ellipse(this.x, this.y, shout_range, shout_range);
+            pg.fill(255, 255, 255, 20);
+            pg.ellipse(this.x, this.y, this.vision_range, this.vision_range);
+            pg.ellipse(this.x, this.y, this.shout_range, this.shout_range);
         }
         if (show_vel) {
-            stroke(255, 0, 0);
-            line(this.x, this.y, this.x + cos(this.angle) * 100, this.y + sin(this.angle) * 100);
+            pg.stroke(255, 0, 0);
+            pg.line(this.x, this.y, this.x + cos(this.angle) * 100, this.y + sin(this.angle) * 100);
         }
     }
     eat(food) {
@@ -173,7 +237,7 @@ class Ant {
     }
     drawClosest(points) {
         for (const a of points) {
-            line(this.x, this.y, a.x, a.y);
+            pg.line(this.x, this.y, a.x, a.y);
         }
     }
 }
@@ -202,52 +266,107 @@ function dc(obj) {
     return JSON.parse(JSON.stringify(obj));
 }
 let cnv;
+let pg;
 let moveUpdate = Date.now();
 let depos = [];
 let ants = [];
+let ant_tree = [];
+let stats = [];
 let tick = 0;
 function setup() {
-    cnv = createCanvas(size, size * (windowHeight / windowWidth));
+    cnv = createCanvas(windowWidth, windowHeight);
     cnv.position(0, 0);
+    pg = createGraphics(1920, 975);
     for (let i = 0; i < num_food; i++) {
         depos.push(new Food());
     }
     for (let i = 0; i < num_ants; i++) {
         let a = new Ant();
         ants.push(a);
+        ant_tree.push(a);
     }
-    textAlign(CENTER, CENTER);
-    ellipseMode(RADIUS);
+    pg.textAlign(CENTER, CENTER);
+    pg.ellipseMode(RADIUS);
 }
 function draw() {
     tick++;
-    scale(windowWidth / size);
-    background(128, 175, 73);
+    pg.fill(128, 175, 73);
+    pg.rect(0, 0, 1920, 975);
     gen_grid_lines();
     show_food();
     doAnts();
     depos.filter((depo) => depo.capacity > 0);
+    let scale = min(windowWidth / 1920, windowHeight / 975);
+    image(pg, 0, 0, 1920 * scale, 975 * scale);
+    width = 1920;
+    height = 975;
+    if (tick % record_every == 0) {
+        stats.push(getStats(ants));
+    }
+}
+function getColor() {
+    const randomInt = (min, max) => {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    };
+    var h = randomInt(0, 360);
+    var s = randomInt(42, 98);
+    var l = randomInt(40, 90);
+    return [h, s, l];
+}
+function keyPressed() {
+    if (key == "s") {
+        save(ant_tree, "tree.json");
+    }
+    if (key == "d") {
+        save(stats, "stats.json");
+    }
+}
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
+}
+function getStats(ants) {
+    let pop = ants.length;
+    let stats = {
+        population_size: pop,
+        speed: ants.reduce((a, b) => a + b.speed, 0) / pop,
+        energy_rate: ants.reduce((a, b) => a + b.energy_rate, 0) / pop,
+        vision_range: ants.reduce((a, b) => a + b.vision_range, 0) / pop,
+        turn_speed: ants.reduce((a, b) => a + b.turn_speed, 0) / pop,
+    };
+    return stats;
 }
 let size = 2000;
 let show_vel = true;
 let show_vision = false;
-let num_food = 5;
-let min_food_size = 25;
-let max_food_size = 75;
+let record_every = 500;
 let num_ants = 5;
-let turn_speed = (10 * Math.PI) / 180;
-let start_food = 1000;
+let turn_speed = (0.5 * Math.PI) / 180;
+let start_food = 500;
 let birth_food = 1200;
-let birth_energy = 400;
-let litter_min = 2;
-let litter_max = 7;
+let birth_energy = 700;
+let litter_size = 4;
+let litter_varience = 2;
 let move_energy = 1;
 let eat_rate = 1;
 let energy_rate = 10;
 let ant_speed = 100;
 let vision_range = 100;
 let shout_range = 300;
+let vision_max = 2;
+let num_food = 5;
+let min_food_size = 25;
+let max_food_size = 75;
 let exist_time = 100;
+let max_skill_points = 20;
+let color_change_rate = 5;
+let pos_mutation_chance = 0.5;
+let sec_pos_mutation_chance = 0.2;
+let speed_effect = 2;
+let move_energy_effect = 0.1;
+let energy_rate_effect = 0.1;
+let turn_speed_effect = 0.5;
+let vision_range_effect = 0.5;
+let litter_size_effect = 1;
 class Food {
     constructor(x = random(0, width), y = random(0, height), c = random(min_food_size, max_food_size)) {
         this.x = x;
@@ -255,10 +374,10 @@ class Food {
         this.capacity = c;
     }
     show() {
-        fill(40, 64, 14);
-        ellipse(this.x, this.y, this.capacity * 2, this.capacity * 2);
-        fill(62, 93, 33);
-        ellipse(this.x, this.y, (this.capacity * 2 * 7) / 10, (this.capacity * 2 * 7) / 10);
+        pg.fill(40, 64, 14);
+        pg.ellipse(this.x, this.y, this.capacity * 2, this.capacity * 2);
+        pg.fill(62, 93, 33);
+        pg.ellipse(this.x, this.y, (this.capacity * 2 * 7) / 10, (this.capacity * 2 * 7) / 10);
     }
     consume(amount) {
         if (amount > 0) {
@@ -270,7 +389,7 @@ class Food {
     }
 }
 function show_food() {
-    strokeWeight(0);
+    pg.strokeWeight(0);
     for (let i = 0; i < depos.length; i++) {
         let f = depos[i];
         f.show();
@@ -281,13 +400,13 @@ function show_food() {
 }
 function gen_grid_lines() {
     let grid_spacing = width / 10;
-    stroke(0);
-    strokeWeight(2);
+    pg.stroke(0);
+    pg.strokeWeight(2);
     for (let i = 0; i < width / grid_spacing; i++) {
-        line(i * grid_spacing, 0, i * grid_spacing, height);
+        pg.line(i * grid_spacing, 0, i * grid_spacing, height);
     }
     for (let i = 0; i < height / grid_spacing; i++) {
-        line(0, i * grid_spacing, width, i * grid_spacing);
+        pg.line(0, i * grid_spacing, width, i * grid_spacing);
     }
 }
 class Point {
