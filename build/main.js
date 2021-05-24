@@ -1,7 +1,6 @@
 "use strict";
 class Ant {
     constructor(x = random(0, width), y = random(0, height)) {
-        this.learning_rate = 1.1;
         this.color = getColor();
         this.size = 25;
         this.food = start_food;
@@ -177,34 +176,34 @@ class Ant {
         spawn.skill_tree.stats = new Map(this.skill_tree.stats);
         let st = spawn.skill_tree.stats;
         let pos_mutations = 0;
-        if (random() > pos_mutation_chance &&
+        if (random() < pos_mutation_chance &&
             spawn.skill_tree.total < max_skill_points) {
             pos_mutations++;
             spawn.skill_tree.total++;
-            while (random() > sec_pos_mutation_chance &&
+            while (random() < sec_pos_mutation_chance &&
                 spawn.skill_tree.total < max_skill_points) {
                 pos_mutations++;
                 spawn.skill_tree.total++;
             }
         }
-        this.mutate(spawn, st, pos_mutations);
+        spawn = this.mutate(spawn, st, pos_mutations, 1);
         let neg_mutations = 0;
-        if (random() > neg_mutations && spawn.skill_tree.total > 0) {
+        if (random() < neg_mutation_chance && spawn.skill_tree.total > 0) {
             neg_mutations++;
             spawn.skill_tree.total--;
-            while (random() > neg_mutations && spawn.skill_tree.total > 0) {
+            while (random() < sec_neg_mutation_chance && spawn.skill_tree.total > 0) {
                 neg_mutations++;
                 spawn.skill_tree.total--;
             }
         }
-        this.mutate(spawn, st, neg_mutations, -1);
+        spawn = this.mutate(spawn, st, neg_mutations, -1);
         spawn.color = JSON.parse(JSON.stringify(this.color));
         spawn.color[0] +=
             random(-color_change_rate, color_change_rate) * pos_mutations;
         spawn.color[0] = clamp(spawn.color[0], 0, 360);
         return spawn;
     }
-    mutate(spawn, st, num, amount = 1) {
+    mutate(spawn, st, num, amount) {
         let branches = Array.from(st, ([name, value]) => name);
         for (let m = 0; m < num; m++) {
             let choice = branches[Math.floor(random() * branches.length)];
@@ -219,6 +218,7 @@ class Ant {
             amount * st.get("vision_range") * vision_range_effect;
         spawn.litter_size +=
             amount * st.get("litter_size") * litter_size_effect;
+        return spawn;
     }
     show() {
         pg.strokeWeight(2);
@@ -316,6 +316,7 @@ function draw() {
     width = size;
     height = size * (975 / 1920);
     if (tick % record_every == 0) {
+        ants = ants.filter((a) => !a.dead);
         stats.push(getStats(ants));
     }
 }
@@ -341,28 +342,29 @@ function windowResized() {
     width = size;
     height = size * (975 / 1920);
 }
-function getStats(ants) {
-    let pop = ants.length;
+function getStats(ants_list) {
+    let pop = ants_list.length;
     let stats = {
         population_size: pop,
-        num_points: ants.reduce((a, b) => a + b.skill_tree.total, 0) / pop,
-        speed: ants.reduce((a, b) => a + b.speed, 0) / pop,
-        energy_rate: ants.reduce((a, b) => a + b.energy_rate, 0) / pop,
-        vision_range: ants.reduce((a, b) => a + b.vision_range, 0) / pop,
-        turn_speed: ants.reduce((a, b) => a + b.turn_speed, 0) / pop,
+        num_points: ants_list.reduce((a, b) => a + b.skill_tree.total, 0) / pop,
+        litter_size: ants_list.reduce((a, b) => a + b.litter_size, 0) / pop,
+        speed: ants_list.reduce((a, b) => a + b.speed, 0) / pop,
+        energy_rate: ants_list.reduce((a, b) => a + b.energy_rate, 0) / pop,
+        vision_range: ants_list.reduce((a, b) => a + b.vision_range, 0) / pop,
+        turn_speed: ants_list.reduce((a, b) => a + b.turn_speed, 0) / pop,
     };
     return stats;
 }
-let size = 4000;
+let size = 3000;
 let show_vel = true;
 let show_vision = false;
-let record_every = 500;
-let num_ants = 50;
+let record_every = 200;
+let num_ants = 30;
 let turn_speed = (0.5 * Math.PI) / 180;
 let start_food = 500;
 let birth_food = 1200;
 let birth_energy = 700;
-let litter_size = 4;
+let litter_size = 1;
 let litter_varience = 2;
 let move_energy = 1;
 let eat_rate = 1;
@@ -371,7 +373,7 @@ let ant_speed = 100;
 let vision_range = 100;
 let shout_range = 300;
 let vision_max = 2;
-let num_food = 20;
+let num_food = 12;
 let min_food_size = 25;
 let max_food_size = 75;
 let exist_time = 100;
@@ -381,10 +383,10 @@ let pos_mutation_chance = 0.5;
 let sec_pos_mutation_chance = 0.2;
 let neg_mutation_chance = 0.5;
 let sec_neg_mutation_chance = 0.2;
-let speed_effect = 2;
-let move_energy_effect = 0.1;
-let energy_rate_effect = 0.1;
-let turn_speed_effect = 0.5;
+let speed_effect = 5;
+let move_energy_effect = 0.05;
+let energy_rate_effect = 0.05;
+let turn_speed_effect = 2;
 let vision_range_effect = 0.5;
 let litter_size_effect = 1;
 class Food {

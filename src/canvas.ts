@@ -47,6 +47,7 @@ function draw() {
   height = size * (975 / 1920);
 
   if (tick % record_every == 0) {
+    ants = ants.filter((a) => !a.dead);
     stats.push(getStats(ants));
   }
 }
@@ -78,16 +79,18 @@ function windowResized() {
   height = size * (975 / 1920);
 }
 
-function getStats(ants: Ant[]) {
-  let pop = ants.length;
+function getStats(ants_list: Ant[]) {
+  let pop = ants_list.length;
   let stats: Stats = {
     population_size: pop,
-    num_points: ants.reduce((a, b) => a + b.skill_tree.total, 0) / pop,
+    num_points: ants_list.reduce((a, b) => a + b.skill_tree.total, 0) / pop,
 
-    speed: ants.reduce((a, b) => a + b.speed, 0) / pop,
-    energy_rate: ants.reduce((a, b) => a + b.energy_rate, 0) / pop,
-    vision_range: ants.reduce((a, b) => a + b.vision_range, 0) / pop,
-    turn_speed: ants.reduce((a, b) => a + b.turn_speed, 0) / pop,
+    litter_size: ants_list.reduce((a, b) => a + b.litter_size, 0) / pop,
+
+    speed: ants_list.reduce((a, b) => a + b.speed, 0) / pop,
+    energy_rate: ants_list.reduce((a, b) => a + b.energy_rate, 0) / pop,
+    vision_range: ants_list.reduce((a, b) => a + b.vision_range, 0) / pop,
+    turn_speed: ants_list.reduce((a, b) => a + b.turn_speed, 0) / pop,
   };
 
   return stats;
@@ -97,6 +100,7 @@ interface Stats {
   population_size: number;
   num_points: number;
 
+  litter_size: number;
   speed: number;
   energy_rate: number;
   vision_range: number;

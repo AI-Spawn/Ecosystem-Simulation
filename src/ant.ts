@@ -3,7 +3,6 @@ class Ant {
   y: number;
 
   skill_tree: Skill_Tree;
-  learning_rate = 1.1;
 
   color = getColor();
 
@@ -221,33 +220,33 @@ class Ant {
 
     let pos_mutations = 0;
     if (
-      random() > pos_mutation_chance &&
+      random() < pos_mutation_chance &&
       spawn.skill_tree.total < max_skill_points
     ) {
       pos_mutations++;
       spawn.skill_tree.total++;
 
       while (
-        random() > sec_pos_mutation_chance &&
+        random() < sec_pos_mutation_chance &&
         spawn.skill_tree.total < max_skill_points
       ) {
         pos_mutations++;
         spawn.skill_tree.total++;
       }
     }
-    this.mutate(spawn, st, pos_mutations);
+    spawn = this.mutate(spawn, st, pos_mutations, 1);
 
     let neg_mutations = 0;
-    if (random() > neg_mutations && spawn.skill_tree.total > 0) {
+    if (random() < neg_mutation_chance && spawn.skill_tree.total > 0) {
       neg_mutations++;
       spawn.skill_tree.total--;
 
-      while (random() > neg_mutations && spawn.skill_tree.total > 0) {
+      while (random() < sec_neg_mutation_chance && spawn.skill_tree.total > 0) {
         neg_mutations++;
         spawn.skill_tree.total--;
       }
     }
-    this.mutate(spawn, st, neg_mutations, -1);
+    spawn = this.mutate(spawn, st, neg_mutations, -1);
 
     //color
     spawn.color = JSON.parse(JSON.stringify(this.color));
@@ -258,7 +257,7 @@ class Ant {
 
     return spawn;
   }
-  mutate(spawn: Ant, st: Map<string, number>, num: number, amount: number = 1) {
+  mutate(spawn: Ant, st: Map<string, number>, num: number, amount: number) {
     //increment skill tree
     let branches = Array.from(st, ([name, value]) => name);
     for (let m = 0; m < num; m++) {
@@ -293,6 +292,8 @@ class Ant {
     spawn.litter_size +=
       //@ts-ignore
       amount * st.get("litter_size") * litter_size_effect;
+
+    return spawn;
   }
 
   show() {
