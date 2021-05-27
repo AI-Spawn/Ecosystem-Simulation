@@ -30,14 +30,40 @@
 
   <div id="form_parent">
     <form id="form" action="javascript:void(0);" onsubmit="sliders()">
+      <br />
       <b>General:</b><br />
       Num Ants: <input type="text" name="num_ants" value="30" /><br />
       Num Food: <input type="text" name="num_food" value="12" /><br />
       Ecosystem Size:
       <input type="text" name="size" value="3000" /><br />
-      <br />
-      <b>Ants:</b><br />
-      Initial Turn Speed (deg):
+
+      <br /><b>Evolution Params:</b><br />
+      Max Skill Points:
+      <input type="text" name="max_skill_points" value="100" /><br />
+      Positive Mutation Chance:
+      <input type="text" name="pos_mutation_chance" value="0.5" /><br />
+      Seconary Positive Mutation Chance:
+      <input type="text" name="sec_pos_mutation_chance" value="0.2" /><br />
+      Negative Mutation Chance:
+      <input type="text" name="neg_mutation_chance" value="0.5" /><br />
+      Seconary Negative Mutation Chance:
+      <input type="text" name="sec_neg_mutation_chance" value="0.2" /><br />
+
+      Speed Effect:
+      <input type="text" name="speed_effect" value="3" /><br />
+      Move Energy Effect:
+      <input type="text" name="move_energy_effect" value="0.1" /><br />
+      Food Efficiancy Effect:
+      <input type="text" name="energy_rate_effect" value="0.1" /><br />
+      Turn Angle Effect:
+      <input type="text" name="turn_speed_effect" value="4" /><br />
+      Vision Range Effect:
+      <input type="text" name="vision_range_effect" value="3" /><br />
+      Num Children Effect:
+      <input type="text" name="litter_size_effect" value="1" /><br />
+
+      <br /><b>Ants:</b><br />
+      Initial Turn Angle (deg):
       <input type="text" name="turn_speed" value="0.5" /><br />
       Initial Food (deg):
       <input type="text" name="start_food" value="500" /><br />
@@ -46,27 +72,23 @@
       <input type="text" name="vision_range" value="100" /><br />
       Initial Num Children:
       <input type="text" name="litter_size" value="1" /><br />
-
-      Food to Mitosis:
+      Food Needed to Mitosis:
       <input type="text" name="birth_food" value="1200" /><br />
-      Food Removed from Mitosis:
+      Food Used During Mitosis:
       <input type="text" name="birth_energy" value="700" /><br />
-
       Num Children Varience:
       <input type="text" name="litter_varience" value="2" /><br />
       Move Energy: <input type="text" name="move_energy" value="1" /><br />
-      Eating Efficiancy:
+      Food Efficiancy:
       <input type="text" name="energy_rate" value="10" /><br />
       Eating Destructivity:
       <input type="text" name="eat_rate" value="1" /><br />
-
       Communication Range:
       <input type="text" name="shout_range" value="300" /><br />
-      <br />
-      <b>Food:</b><br />
-      Min Food Size:
-      <input type="text" name="min_food_size" value="25" /><br />Max Food Size:
-      <input type="text" name="max_food_size" value="75" /><br />
+
+      <br /><b>Food:</b><br />
+      Min Food Size: <input type="text" name="min_food_size" value="25" /><br />
+      Max Food Size: <input type="text" name="max_food_size" value="75" /><br />
 
       <br /><br />
       <input type="submit" value="Submit" />
