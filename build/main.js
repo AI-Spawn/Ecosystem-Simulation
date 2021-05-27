@@ -175,6 +175,7 @@ class Ant {
         spawn.skill_tree.total = this.skill_tree.total;
         spawn.skill_tree.stats = new Map(this.skill_tree.stats);
         let st = spawn.skill_tree.stats;
+        let branches = Array.from(st, ([name, value]) => name);
         let pos_mutations = 0;
         if (random() < pos_mutation_chance &&
             spawn.skill_tree.total < max_skill_points) {
@@ -186,7 +187,10 @@ class Ant {
                 spawn.skill_tree.total++;
             }
         }
-        spawn = this.mutate(spawn, st, pos_mutations, 1);
+        for (let i = 0; i < pos_mutations; i++) {
+            let choice = branches[Math.floor(random() * branches.length)];
+            st.set(choice, st.get(choice) + 1);
+        }
         let neg_mutations = 0;
         if (random() < neg_mutation_chance && spawn.skill_tree.total > 0) {
             neg_mutations++;
@@ -196,28 +200,27 @@ class Ant {
                 spawn.skill_tree.total--;
             }
         }
-        spawn = this.mutate(spawn, st, neg_mutations, -1);
+        for (let i = 0; i < neg_mutations; i++) {
+            let choice = branches[Math.floor(random() * branches.length)];
+            st.set(choice, st.get(choice) - 1);
+        }
+        spawn = this.mutate(spawn, st, neg_mutations);
         spawn.color = JSON.parse(JSON.stringify(this.color));
         spawn.color[0] +=
             random(-color_change_rate, color_change_rate) * pos_mutations;
         spawn.color[0] = clamp(spawn.color[0], 0, 360);
         return spawn;
     }
-    mutate(spawn, st, num, amount) {
-        let branches = Array.from(st, ([name, value]) => name);
-        for (let m = 0; m < num; m++) {
-            let choice = branches[Math.floor(random() * branches.length)];
-            st.set(choice, st.get(choice) + 1);
-        }
-        spawn.speed += speed_effect * amount * st.get("speed");
-        spawn.move_energy -= max(move_energy_effect * amount * st.get("move_energy"), this.move_energy - 1);
-        spawn.energy_rate += energy_rate_effect * amount * st.get("energy_rate");
+    mutate(spawn, st, num) {
+        spawn.speed += speed_effect * st.get("speed");
+        spawn.move_energy -= max(move_energy_effect * st.get("move_energy"), this.move_energy - 1);
+        spawn.energy_rate += energy_rate_effect * st.get("energy_rate");
         spawn.turn_speed +=
-            (turn_speed_effect * amount * st.get("turn_angle") * Math.PI) / 180;
+            (turn_speed_effect * st.get("turn_angle") * Math.PI) / 180;
         spawn.vision_range +=
-            amount * st.get("vision_range") * vision_range_effect;
+            st.get("vision_range") * vision_range_effect;
         spawn.litter_size +=
-            amount * st.get("litter_size") * litter_size_effect;
+            st.get("litter_size") * litter_size_effect;
         return spawn;
     }
     show() {
@@ -287,11 +290,11 @@ let ant_tree = [];
 let stats = [];
 let tick = 0;
 function setup() {
-    width = size;
-    height = size * (975 / 1920);
     cnv = createCanvas(windowWidth, windowHeight);
     cnv.position(0, 0);
     pg = createGraphics(size, size * (975 / 1920));
+    width = size;
+    height = size * (975 / 1920);
     for (let i = 0; i < num_food; i++) {
         depos.push(new Food());
     }

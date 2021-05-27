@@ -217,6 +217,7 @@ class Ant {
     spawn.skill_tree.total = this.skill_tree.total;
     spawn.skill_tree.stats = new Map(this.skill_tree.stats);
     let st = spawn.skill_tree.stats;
+    let branches = Array.from(st, ([name, value]) => name);
 
     let pos_mutations = 0;
     if (
@@ -234,8 +235,15 @@ class Ant {
         spawn.skill_tree.total++;
       }
     }
-    spawn = this.mutate(spawn, st, pos_mutations, 1);
-
+    for (let i = 0; i < pos_mutations; i++) {
+      //decrement skill tree
+      let choice = branches[Math.floor(random() * branches.length)];
+      st.set(
+        choice,
+        //@ts-ignore
+        st.get(choice) + 1
+      );
+    }
     let neg_mutations = 0;
     if (random() < neg_mutation_chance && spawn.skill_tree.total > 0) {
       neg_mutations++;
@@ -246,7 +254,16 @@ class Ant {
         spawn.skill_tree.total--;
       }
     }
-    spawn = this.mutate(spawn, st, neg_mutations, -1);
+    for (let i = 0; i < neg_mutations; i++) {
+      //decrement skill tree
+      let choice = branches[Math.floor(random() * branches.length)];
+      st.set(
+        choice,
+        //@ts-ignore
+        st.get(choice) - 1
+      );
+    }
+    spawn = this.mutate(spawn, st, neg_mutations);
 
     //color
     spawn.color = JSON.parse(JSON.stringify(this.color));
@@ -257,41 +274,29 @@ class Ant {
 
     return spawn;
   }
-  mutate(spawn: Ant, st: Map<string, number>, num: number, amount: number) {
-    //increment skill tree
-    let branches = Array.from(st, ([name, value]) => name);
-    for (let m = 0; m < num; m++) {
-      let choice = branches[Math.floor(random() * branches.length)];
-      st.set(
-        choice,
-        //@ts-ignore
-        st.get(choice) + 1
-      );
-    }
-
+  mutate(spawn: Ant, st: Map<string, number>, num: number) {
     //@ts-ignore
-    spawn.speed += speed_effect * amount * st.get("speed");
-
+    spawn.speed += speed_effect * st.get("speed");
     spawn.move_energy -= max(
       //@ts-ignore
-      move_energy_effect * amount * st.get("move_energy"),
+      move_energy_effect * st.get("move_energy"),
       this.move_energy - 1
     );
 
     //@ts-ignore
-    spawn.energy_rate += energy_rate_effect * amount * st.get("energy_rate");
+    spawn.energy_rate += energy_rate_effect * st.get("energy_rate");
 
     spawn.turn_speed +=
       //@ts-ignore
-      (turn_speed_effect * amount * st.get("turn_angle") * Math.PI) / 180;
+      (turn_speed_effect * st.get("turn_angle") * Math.PI) / 180;
 
     spawn.vision_range +=
       //@ts-ignore
-      amount * st.get("vision_range") * vision_range_effect;
+      st.get("vision_range") * vision_range_effect;
 
     spawn.litter_size +=
       //@ts-ignore
-      amount * st.get("litter_size") * litter_size_effect;
+      st.get("litter_size") * litter_size_effect;
 
     return spawn;
   }

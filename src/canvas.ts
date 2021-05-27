@@ -13,12 +13,11 @@ let stats: Stats[] = [];
 let tick = 0;
 
 function setup() {
-  width = size;
-  height = size * (975 / 1920);
   cnv = createCanvas(windowWidth, windowHeight);
   cnv.position(0, 0);
   pg = createGraphics(size, size * (975 / 1920));
-
+  width = size;
+  height = size * (975 / 1920);
   for (let i = 0; i < num_food; i++) {
     depos.push(new Food());
   }
