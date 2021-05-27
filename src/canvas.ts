@@ -19,6 +19,11 @@ function setup() {
   pg = createGraphics(size, size * (975 / 1920));
   width = size;
   height = size * (975 / 1920);
+  init_ants();
+  pg.textAlign(CENTER, CENTER);
+  pg.ellipseMode(RADIUS);
+}
+function init_ants() {
   for (let i = 0; i < num_food; i++) {
     depos.push(new Food());
   }
@@ -27,8 +32,6 @@ function setup() {
     ants.push(a);
     ant_tree.push(a);
   }
-  pg.textAlign(CENTER, CENTER);
-  pg.ellipseMode(RADIUS);
 }
 function draw() {
   tick++;
