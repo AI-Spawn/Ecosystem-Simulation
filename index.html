@@ -1,15 +1,17 @@
 <head>
   <title>Ecosystem Simulation</title>
   <style>
+    body {
+      overflow-x: hidden;
+    }
     #canvas {
-      position: absolute;
+      /* position: absolute; */
       top: 0;
       left: 0;
       margin: 0px;
     }
     #form_parent {
-      position: absolute;
-      bottom: 0;
+      position: relative;
     }
     #form {
     }
@@ -28,8 +30,45 @@
 
   <div id="form_parent">
     <form id="form" action="javascript:void(0);" onsubmit="sliders()">
-      bob: <input type="text" name="fname" value="10" /><br />
-      steve: <input type="text" name="lname" value="20" /><br /><br />
+      <b>General:</b><br />
+      Num Ants: <input type="text" name="num_ants" value="30" /><br />
+      Num Food: <input type="text" name="num_food" value="12" /><br />
+      Ecosystem Size:
+      <input type="text" name="size" value="3000" /><br />
+      <br />
+      <b>Ants:</b><br />
+      Initial Turn Speed (deg):
+      <input type="text" name="turn_speed" value="0.5" /><br />
+      Initial Food (deg):
+      <input type="text" name="start_food" value="500" /><br />
+      Initial Speed: <input type="text" name="ant_speed" value="100" /><br />
+      Initial Vision Range:
+      <input type="text" name="vision_range" value="100" /><br />
+      Initial Num Children:
+      <input type="text" name="litter_size" value="1" /><br />
+
+      Food to Mitosis:
+      <input type="text" name="birth_food" value="1200" /><br />
+      Food Removed from Mitosis:
+      <input type="text" name="birth_energy" value="700" /><br />
+
+      Num Children Varience:
+      <input type="text" name="litter_varience" value="2" /><br />
+      Move Energy: <input type="text" name="move_energy" value="1" /><br />
+      Eating Efficiancy:
+      <input type="text" name="energy_rate" value="10" /><br />
+      Eating Destructivity:
+      <input type="text" name="eat_rate" value="1" /><br />
+
+      Communication Range:
+      <input type="text" name="shout_range" value="300" /><br />
+      <br />
+      <b>Food:</b><br />
+      Min Food Size:
+      <input type="text" name="min_food_size" value="25" /><br />Max Food Size:
+      <input type="text" name="max_food_size" value="75" /><br />
+
+      <br /><br />
       <input type="submit" value="Submit" />
     </form>
   </div>

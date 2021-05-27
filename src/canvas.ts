@@ -29,9 +29,6 @@ function setup() {
   }
   pg.textAlign(CENTER, CENTER);
   pg.ellipseMode(RADIUS);
-  if (!sliders_made) {
-    create_sliders();
-  }
 }
 function draw() {
   tick++;
