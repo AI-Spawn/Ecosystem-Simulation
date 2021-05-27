@@ -291,7 +291,7 @@ let stats = [];
 let tick = 0;
 function setup() {
     cnv = createCanvas(windowWidth, windowHeight);
-    cnv.position(0, 0);
+    cnv.parent("canvas");
     pg = createGraphics(size, size * (975 / 1920));
     width = size;
     height = size * (975 / 1920);
@@ -305,6 +305,9 @@ function setup() {
     }
     pg.textAlign(CENTER, CENTER);
     pg.ellipseMode(RADIUS);
+    if (!sliders_made) {
+        create_sliders();
+    }
 }
 function draw() {
     tick++;
@@ -698,5 +701,16 @@ class QuadTree {
         }
         return count;
     }
+}
+let sliders_made = false;
+function create_sliders() { }
+function sliders() {
+    var x = document.getElementById("form");
+    var text = "";
+    var i;
+    for (i = 0; i < x.length; i++) {
+        text += x.elements[i].value + "<br>";
+    }
+    console.log(text);
 }
 //# sourceMappingURL=../src/src/main.js.map

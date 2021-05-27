@@ -14,7 +14,8 @@ let tick = 0;
 
 function setup() {
   cnv = createCanvas(windowWidth, windowHeight);
-  cnv.position(0, 0);
+  cnv.parent("canvas");
+  // cnv.position(0, 0);
   pg = createGraphics(size, size * (975 / 1920));
   width = size;
   height = size * (975 / 1920);
@@ -28,6 +29,9 @@ function setup() {
   }
   pg.textAlign(CENTER, CENTER);
   pg.ellipseMode(RADIUS);
+  if (!sliders_made) {
+    create_sliders();
+  }
 }
 function draw() {
   tick++;
