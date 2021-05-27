@@ -60,8 +60,8 @@ let speed_effect = 5;
 let move_energy_effect = 0.05;
 let energy_rate_effect = 0.05;
 
-let turn_speed_effect = 2;
+let turn_speed_effect = 4;
 
-let vision_range_effect = 0.5;
+let vision_range_effect = 3;
 
 let litter_size_effect = 1;
