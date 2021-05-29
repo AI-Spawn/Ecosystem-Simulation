@@ -5,7 +5,7 @@ let size = 3000;
 let show_vel = true;
 let show_vision = false;
 
-let record_every = 200;
+let record_every = 50;
 
 //////////
 // ants //

@@ -366,7 +366,7 @@ function getStats(ants_list) {
 let size = 3000;
 let show_vel = true;
 let show_vision = false;
-let record_every = 200;
+let record_every = 50;
 let num_ants = 30;
 let turn_speed = (0.5 * Math.PI) / 180;
 let start_food = 500;
@@ -429,27 +429,33 @@ function show_food() {
     }
 }
 let graphs = {
+    points: [],
     speed: [],
 };
 function graph(data) {
     google.charts.load("current", { packages: ["corechart"] });
     google.charts.setOnLoadCallback(drawChart);
-    graphs.speed = [
-        ["Tick", "Speed"],
-        [0, ant_speed],
-    ];
+    graphs.points = [["Tick", "Points"]];
+    graphs.speed = [["Tick", "Speed"]];
     for (const d of data) {
+        graphs.points.push([d.tick, d.num_points]);
         graphs.speed.push([d.tick, d.speed]);
     }
     function drawChart() {
-        console.log(graphs.speed);
-        var data = google.visualization.arrayToDataTable(graphs.speed);
+        let num_points = google.visualization.arrayToDataTable(graphs.points);
         var options = {
-            title: "Average Ant Speed",
+            title: "Average Points",
             legend: { position: "bottom" },
         };
-        var chart = new google.visualization.LineChart(document.getElementById("curve_chart"));
-        chart.draw(data, options);
+        var chart = new google.visualization.LineChart(document.getElementById("points_chart"));
+        chart.draw(num_points, options);
+        let speed = google.visualization.arrayToDataTable(graphs.speed);
+        var options = {
+            title: "Average Speed",
+            legend: { position: "bottom" },
+        };
+        var chart = new google.visualization.LineChart(document.getElementById("speed_chart"));
+        chart.draw(speed, options);
     }
 }
 function gen_grid_lines() {
