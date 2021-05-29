@@ -324,6 +324,7 @@ function draw() {
     if (tick % record_every == 0) {
         ants = ants.filter((a) => !a.dead);
         stats.push(getStats(ants));
+        graph(stats);
     }
 }
 function getColor() {
@@ -351,6 +352,7 @@ function windowResized() {
 function getStats(ants_list) {
     let pop = ants_list.length;
     let stats = {
+        tick: tick,
         population_size: pop,
         num_points: ants_list.reduce((a, b) => a + b.skill_tree.total, 0) / pop,
         litter_size: ants_list.reduce((a, b) => a + b.litter_size, 0) / pop,
@@ -424,6 +426,30 @@ function show_food() {
         if (f.capacity <= 20) {
             depos[i] = new Food();
         }
+    }
+}
+let graphs = {
+    speed: [],
+};
+function graph(data) {
+    google.charts.load("current", { packages: ["corechart"] });
+    google.charts.setOnLoadCallback(drawChart);
+    graphs.speed = [
+        ["Tick", "Speed"],
+        [0, ant_speed],
+    ];
+    for (const d of data) {
+        graphs.speed.push([d.tick, d.speed]);
+    }
+    function drawChart() {
+        console.log(graphs.speed);
+        var data = google.visualization.arrayToDataTable(graphs.speed);
+        var options = {
+            title: "Average Ant Speed",
+            legend: { position: "bottom" },
+        };
+        var chart = new google.visualization.LineChart(document.getElementById("curve_chart"));
+        chart.draw(data, options);
     }
 }
 function gen_grid_lines() {
@@ -737,6 +763,7 @@ function sliders() {
     ants = [];
     depos = [];
     ant_tree = [];
+    tick = 0;
     init_ants();
 }
 //# sourceMappingURL=../src/src/main.js.map

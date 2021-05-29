@@ -42,5 +42,6 @@ function sliders() {
   ants = [];
   depos = [];
   ant_tree = [];
+  tick = 0;
   init_ants();
 }
