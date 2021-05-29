@@ -9,7 +9,9 @@
     "typescript": ">=4.0.0"
   },
   "main": "index.js",
-  "dependencies": {},
+  "dependencies": {
+    "@types/google.visualization": "0.0.66"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AI-Spawn/p5js-typescript-template"

@@ -52,6 +52,7 @@ function draw() {
   if (tick % record_every == 0) {
     ants = ants.filter((a) => !a.dead);
     stats.push(getStats(ants));
+    graph(stats);
   }
 }
 
@@ -85,6 +86,7 @@ function windowResized() {
 function getStats(ants_list: Ant[]) {
   let pop = ants_list.length;
   let stats: Stats = {
+    tick: tick,
     population_size: pop,
     num_points: ants_list.reduce((a, b) => a + b.skill_tree.total, 0) / pop,
 
@@ -100,6 +102,7 @@ function getStats(ants_list: Ant[]) {
 }
 
 interface Stats {
+  tick: number;
   population_size: number;
   num_points: number;
 

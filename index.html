@@ -22,6 +22,11 @@
 <body>
   <div id="canvas"></div>
   <script
+    type="text/javascript"
+    src="https://www.gstatic.com/charts/loader.js"
+  ></script>
+
+  <script
     src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.3.1/p5.min.js"
     integrity="sha512-gQVBYBvfC+uyor5Teonjr9nmY1bN+DlOCezkhzg4ShpC5q81ogvFsr5IV4xXAj6HEtG7M1Pb2JCha97tVFItYQ=="
     crossorigin="anonymous"
@@ -65,9 +70,9 @@
       <input type="text" name="litter_size_effect" value="1" /><br />
 
       <br /><b>Ants:</b><br />
-      Initial Turn Angle (deg):
+      Initial Turn Angle (Rad):
       <input type="text" name="turn_speed" value="0.5" /><br />
-      Initial Food (deg):
+      Initial Food:
       <input type="text" name="start_food" value="500" /><br />
       Initial Speed: <input type="text" name="ant_speed" value="100" /><br />
       Initial Vision Range:
@@ -95,4 +100,7 @@
       <input type="submit" value="Submit" />
     </form>
   </div>
+  <div id="points_chart" style="width: 900px; height: 500px"></div>
+
+  <div id="speed_chart" style="width: 900px; height: 500px"></div>
 </body>
