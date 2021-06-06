@@ -30,6 +30,7 @@ function graph(data: Stats[]) {
     var chart = new google.visualization.LineChart(
       document.getElementById("points_chart")
     );
+
     chart.draw(num_points, options);
 
     let speed = google.visualization.arrayToDataTable(graphs.speed);
@@ -37,8 +38,25 @@ function graph(data: Stats[]) {
       title: "Average Speed",
       legend: { position: "bottom" },
     };
+
     var chart = new google.visualization.LineChart(
       document.getElementById("speed_chart")
+    );
+
+    chart.draw(speed, options);
+
+    var chart = new google.visualization.LineChart(
+      document.getElementById("e1")
+    );
+    chart.draw(speed, options);
+
+    var chart = new google.visualization.LineChart(
+      document.getElementById("e2")
+    );
+    chart.draw(speed, options);
+
+    var chart = new google.visualization.LineChart(
+      document.getElementById("e3")
     );
     chart.draw(speed, options);
   }

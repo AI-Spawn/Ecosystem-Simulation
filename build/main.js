@@ -292,9 +292,9 @@ let tick = 0;
 function setup() {
     cnv = createCanvas(windowWidth, windowHeight);
     cnv.parent("canvas");
-    pg = createGraphics(size, size * (975 / 1920));
+    pg = createGraphics(size, size * (975 / 1900));
     width = size;
-    height = size * (975 / 1920);
+    height = size * (975 / 1900);
     init_ants();
     pg.textAlign(CENTER, CENTER);
     pg.ellipseMode(RADIUS);
@@ -317,10 +317,10 @@ function draw() {
     show_food();
     doAnts();
     depos.filter((depo) => depo.capacity > 0);
-    let scale = min(windowWidth / 1920, windowHeight / 975);
-    image(pg, 0, 0, 1920 * scale, 975 * scale);
+    let scale = min(windowWidth / 1900, windowHeight / 975);
+    image(pg, 0, 0, 1900 * scale, 975 * scale);
     width = size;
-    height = size * (975 / 1920);
+    height = size * (975 / 1900);
     if (tick % record_every == 0) {
         ants = ants.filter((a) => !a.dead);
         stats.push(getStats(ants));
@@ -347,7 +347,7 @@ function keyPressed() {
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
     width = size;
-    height = size * (975 / 1920);
+    height = size * (975 / 1900);
 }
 function getStats(ants_list) {
     let pop = ants_list.length;
@@ -455,6 +455,12 @@ function graph(data) {
             legend: { position: "bottom" },
         };
         var chart = new google.visualization.LineChart(document.getElementById("speed_chart"));
+        chart.draw(speed, options);
+        var chart = new google.visualization.LineChart(document.getElementById("e1"));
+        chart.draw(speed, options);
+        var chart = new google.visualization.LineChart(document.getElementById("e2"));
+        chart.draw(speed, options);
+        var chart = new google.visualization.LineChart(document.getElementById("e3"));
         chart.draw(speed, options);
     }
 }
