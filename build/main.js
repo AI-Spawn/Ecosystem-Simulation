@@ -476,6 +476,18 @@ function graph(data) {
         options.title = "Average Turn Angle (Rad)";
         chart = new google.visualization.LineChart(document.getElementById("turn_angle_chart"));
         chart.draw(turn, options);
+        let children = google.visualization.arrayToDataTable(graphs.num_children);
+        options.title = "Average Number of Children per Mitosis";
+        chart = new google.visualization.LineChart(document.getElementById("num_children_chart"));
+        chart.draw(children, options);
+        let consumption = google.visualization.arrayToDataTable(graphs.energy_consumtion_rate);
+        options.title = "Average Energy Consomtion Efficiancy";
+        chart = new google.visualization.LineChart(document.getElementById("energy_consumtion_chart"));
+        chart.draw(consumption, options);
+        let vision = google.visualization.arrayToDataTable(graphs.vision_range);
+        options.title = "Average Vision Range";
+        chart = new google.visualization.LineChart(document.getElementById("vision_range_chart"));
+        chart.draw(vision, options);
     }
 }
 function gen_grid_lines() {
