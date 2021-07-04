@@ -6,7 +6,7 @@ interface Graphs {
   speed: [any.any][];
   turn: [any, any][];
   num_children: [any, any][];
-  energy_consumtion_rate: [any, any][];
+  energy_consumption_rate: [any, any][];
   vision_range: [any, any][];
 }
 let graphs: Graphs = {
@@ -16,7 +16,7 @@ let graphs: Graphs = {
   speed: [],
   turn: [],
   num_children: [],
-  energy_consumtion_rate: [],
+  energy_consumption_rate: [],
   vision_range: [],
 };
 function graph(data: Stats[]) {
@@ -29,7 +29,7 @@ function graph(data: Stats[]) {
   graphs.speed = [["Tick", "Speed"]];
   graphs.turn = [["Tick", "Turn Angle Rad"]];
   graphs.num_children = [["Tick", "Number of Children"]];
-  graphs.energy_consumtion_rate = [["Tick", "Energy Consumtion Rate"]];
+  graphs.energy_consumption_rate = [["Tick", "Energy Consumption Rate"]];
   graphs.vision_range = [["Tick", "Vision Range"]];
 
   for (const d of data) {
@@ -39,7 +39,7 @@ function graph(data: Stats[]) {
     graphs.speed.push([d.tick, d.speed]);
     graphs.turn.push([d.tick, d.turn_speed]);
     graphs.num_children.push([d.tick, d.litter_size]);
-    graphs.energy_consumtion_rate.push([d.tick, d.energy_rate]);
+    graphs.energy_consumption_rate.push([d.tick, d.energy_rate]);
     graphs.vision_range.push([d.tick, d.vision_range]);
   }
 
@@ -85,11 +85,11 @@ function graph(data: Stats[]) {
     chart.draw(children, options);
 
     let consumption = google.visualization.arrayToDataTable(
-      graphs.energy_consumtion_rate
+      graphs.energy_consumption_rate
     );
-    options.title = "Average Energy Consomtion Efficiancy";
+    options.title = "Average Energy Consumption Efficiency";
     chart = new google.visualization.LineChart(
-      document.getElementById("energy_consumtion_chart")
+      document.getElementById("energy_consumption_chart")
     );
     chart.draw(consumption, options);
 
